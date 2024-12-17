@@ -16,7 +16,7 @@ class MP3_Player(QMainWindow):
         super().__init__(parent)
 
         self.setWindowTitle("MP3 Player")
-        self.setGeometry(100, 100, 600, 400)
+        self.setGeometry(100, 100, 700, 500)
 
         # Initialize Pygame mixer
         pygame.mixer.init()
@@ -47,6 +47,12 @@ class MP3_Player(QMainWindow):
         central_layout = QVBoxLayout(central_widget)
 
         self.current_song = QLabel(f"Song: {self.current_music}", self)
+
+        # Set the font size using QFont
+        font = self.current_song.font()
+        font.setPointSize(20)  # Set the font size to 20
+        self.current_song.setFont(font)
+
         central_layout.addWidget(self.current_song)
 
         # Create and set up the playlist widget
@@ -116,7 +122,7 @@ class MP3_Player(QMainWindow):
 
         # Playlist button
         self.playlist_button = QPushButton("Add from Folder", self)
-        self.playlist_button.clicked.connect(lambda: self.load_playlist_folder(True))
+        self.playlist_button.clicked.connect(lambda: self.load_playlist_folder(False))
         dock_layout.addWidget(self.playlist_button)
 
         dock_widget.setWidget(dock_content)
@@ -162,6 +168,14 @@ class MP3_Player(QMainWindow):
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
+
+        clear_action = QAction("Clear", self)
+        clear_action.triggered.connect(self.clear_playlist)
+        file_menu.addAction(exit_action)
+
+    def clear_playlist(self):
+            self.playlist_list.clear()  # Clear the playlist display
+            self.media_files.clear()  # Clear the playlist
 
     def play_playlist(self) -> None:
         if self.play_playlist_button.text() == "Stop Playlist":
@@ -219,22 +233,19 @@ class MP3_Player(QMainWindow):
 
         files: list[str] = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(self.audio_file_types)]
         if clear:
-            self.playlist_list.clear()  # Clear the playlist display
-            self.media_files.clear()  # Clear the playlist
-
+            self.clear_playlist()
         self.media_files.extend(files) # Add the selected songs to the playlist
 
         self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
 
     def load_single_files(self, clear: bool = False) -> None:
         # Open file dialog to select MP3 files
-        files, _ = QFileDialog.getOpenFileNames(self, "Select MP3 Files", "", self.audio_file_types[0])
+        files, _ = QFileDialog.getOpenFileNames(self, "Select MP3 Files", "", "audio (*.mp3 *.wav );;All Files (*)")
 
         if not files: return
 
         if clear:
-            self.playlist_list.clear()  # Clear the playlist display
-            self.media_files.clear()  # Clear the playlist
+            self.clear_playlist()
 
         self.media_files.extend(files) # Add the selected songs to the playlist
 
