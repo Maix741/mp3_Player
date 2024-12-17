@@ -43,7 +43,7 @@ class MP3_Player(QMainWindow):
     def load_translation(self):
         translator = QTranslator()
         locale = QLocale.system().name()  # Get the system's default locale (e.g., 'en_US')
-        translation_file = os.path.join("locale", f"{locale}.qm")  # Assumes translation files are in a 'translations' folder
+        translation_file = os.path.join("locale", f"{locale}.qm")  # Assumes translation files are in a 'locale' folder
 
         if os.path.exists(translation_file):
             translator.load(translation_file)
