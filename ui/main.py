@@ -52,9 +52,12 @@ class MP3_Player(QMainWindow):
         # Create and set up the playlist widget
         self.playlist_list = QListWidget(self)
         self.playlist_list.clicked.connect(self.play_selected)
-        self.playlist_list.setFixedWidth(1000)  # Optional: Set a fixed width
-        self.playlist_list.setFixedHeight(500)  # Optional: Set a fixed height
-        central_layout.addWidget(self.playlist_list, alignment=Qt.AlignCenter)
+
+        # Allow the playlist to expand to fill the available space
+        central_layout.addWidget(self.playlist_list)
+
+        # Set the layout to stretch to fill available space
+        central_layout.setStretch(1, 1)  # Make the playlist widget expand
 
         # Add a spacer to push elements down
         spacer_item = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
@@ -89,7 +92,6 @@ class MP3_Player(QMainWindow):
         # Create a QWidget to house the left-side controls
         dock_widget = QDockWidget("Controls", self)
         dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
-
         dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
         dock_content = QWidget(self)
@@ -114,7 +116,7 @@ class MP3_Player(QMainWindow):
 
         # Playlist button
         self.playlist_button = QPushButton("Add from Folder", self)
-        self.playlist_button.clicked.connect(self.load_playlist_folder)
+        self.playlist_button.clicked.connect(lambda: self.load_playlist_folder(True))
         dock_layout.addWidget(self.playlist_button)
 
         dock_widget.setWidget(dock_content)
