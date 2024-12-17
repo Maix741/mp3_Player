@@ -4,6 +4,7 @@ import pygame
 
 class PlaylistThread(QThread):
     song_changed = Signal(str)
+    show_progress_slider = Signal(bool)
 
     def __init__(self, media_files: list[str], parent=None):
         super().__init__(parent)
@@ -19,4 +20,5 @@ class PlaylistThread(QThread):
 
             # Wait until the song is finished
             while pygame.mixer.music.get_busy():
+                self.show_progress_slider.emit(True)
                 self.msleep(100)  # Sleep to avoid blocking the thread

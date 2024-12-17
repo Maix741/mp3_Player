@@ -5,7 +5,10 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction
 import pygame
 
-from play_playlist import PlaylistThread
+if __name__ == "__main__":
+    from play_playlist import PlaylistThread
+
+else: from .play_playlist import PlaylistThread
 
 
 class MP3_Player(QMainWindow):
@@ -162,11 +165,15 @@ class MP3_Player(QMainWindow):
         # Create and start the playlist thread
         self.playlist_thread = PlaylistThread(self.media_files)
         self.playlist_thread.song_changed.connect(self.update_current_song)
+        self.playlist_thread.show_progress_slider.connect(lambda: self.progress_slider.setHidden(False))
         self.playlist_thread.finished.connect(self.on_playlist_finished)
+
+        self.play_playlist_button.setText("Stop Playlist")
+
         self.playlist_thread.start()
 
     def update_current_song(self, song: str) -> None:
-        self.current_song.setText(f"Song: {song}")
+        self.play_next(song)
 
     def on_playlist_finished(self) -> None:
         self.play_button.setText("Play")
@@ -194,23 +201,33 @@ class MP3_Player(QMainWindow):
     def set_volume(self, value) -> None:
         pygame.mixer.music.set_volume(value / 100)
 
-    def load_playlist_folder(self) -> None:
+    def load_playlist_folder(self, clear: bool = True) -> None:
         directory = QFileDialog.getExistingDirectory(self, "Choose Playlist", self.initial_directory)
 
-        if directory:
-            files: list[str] = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(self.audio_file_types)]
-            self.media_files = files  # Save the selected files to the list
-            self.playlist_list.clear()  # Clear the playlist display
-            self.playlist_list.addItems(files)  # Display the files in the playlist
+        if not directory: return
 
-    def load_single_files(self) -> None:
+        files: list[str] = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(self.audio_file_types)]
+        if clear:
+            self.playlist_list.clear()  # Clear the playlist display
+            self.media_files.clear()  # Clear the playlist
+
+        self.media_files.extend(files) # Add the selected songs to the playlist
+
+        self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
+
+    def load_single_files(self, clear: bool = False) -> None:
         # Open file dialog to select MP3 files
         files, _ = QFileDialog.getOpenFileNames(self, "Select MP3 Files", "", self.audio_file_types[0])
 
-        if files:
-            self.media_files = files  # Save the selected files to the list
+        if not files: return
+
+        if clear:
             self.playlist_list.clear()  # Clear the playlist display
-            self.playlist_list.addItems(files)  # Display the files in the playlist
+            self.media_files.clear()  # Clear the playlist
+
+        self.media_files.extend(files) # Add the selected songs to the playlist
+
+        self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
 
     def play_selected(self) -> None:
         # Play the selected item in the playlist
@@ -219,13 +236,16 @@ class MP3_Player(QMainWindow):
             self.current_index = self.playlist_list.row(current_item)
             self.play_next()
 
-    def play_next(self) -> None:
+    def play_next(self, media_file: str | None = None) -> None:
         # Check if there are any files in the playlist
         if not self.media_files:
             return
 
         self.progress_slider.setHidden(False)
-        self.current_music = self.media_files[self.current_index]
+        if not media_file:
+            self.current_music = self.media_files[self.current_index]
+        else: self.current_music = media_file
+
         self.current_song.setText(f"Song: {self.current_music}")
         pygame.mixer.music.load(self.current_music)
         pygame.mixer.music.play()
