@@ -1,6 +1,6 @@
 import sys, os
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget
+from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction
 import pygame
@@ -162,10 +162,13 @@ class MP3_Player(QMainWindow):
         file_menu.addAction(exit_action)
 
     def play_playlist(self) -> None:
+        if self.play_playlist_button.text() == "Stop Playlist":
+            self.on_playlist_finished()
+
         # Create and start the playlist thread
         self.playlist_thread = PlaylistThread(self.media_files)
         self.playlist_thread.song_changed.connect(self.update_current_song)
-        self.playlist_thread.show_progress_slider.connect(lambda: self.progress_slider.setHidden(False))
+        self.playlist_thread.hide_progress_slider.connect(self.progress_slider.setHidden)
         self.playlist_thread.finished.connect(self.on_playlist_finished)
 
         self.play_playlist_button.setText("Stop Playlist")
@@ -173,10 +176,15 @@ class MP3_Player(QMainWindow):
         self.playlist_thread.start()
 
     def update_current_song(self, song: str) -> None:
-        self.play_next(song)
+        self.current_song.setText(f"Song: {self.current_music}")
 
     def on_playlist_finished(self) -> None:
+        self.playlist_thread.stop()
+
+        self.play_playlist_button.setText("Play Playlist")
         self.play_button.setText("Play")
+
+        self.progress_slider.setHidden(True)
         self.progress_slider.setHidden(True)
 
     def toggle_play_pause(self) -> None:
@@ -196,6 +204,7 @@ class MP3_Player(QMainWindow):
     def stop_audio(self) -> None:
         self.progress_slider.setHidden(True)
         pygame.mixer.music.stop()
+        pygame.mixer.music.unload()
         self.play_button.setText("Play")
 
     def set_volume(self, value) -> None:
@@ -267,6 +276,7 @@ class MP3_Player(QMainWindow):
 
 
 if __name__ == "__main__":
+    from PySide6.QtWidgets import QApplication
     app = QApplication(sys.argv)
     player = MP3_Player(r"C:\Users\maxi2\Music\Stupendium")
     player.show()
