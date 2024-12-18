@@ -7,8 +7,11 @@ import pygame
 
 if __name__ == "__main__":
     from play_playlist import PlaylistThread
+    from load_playlists import Saved_Playlists_handler
 
-else: from .play_playlist import PlaylistThread
+else:
+    from .play_playlist import PlaylistThread
+    from .load_playlists import Saved_Playlists_handler
 
 
 class MP3_Player(QMainWindow):
@@ -28,6 +31,9 @@ class MP3_Player(QMainWindow):
         self.music_length = 0
         self.audio_file_types = (".mp3", ".wav")
         self.initial_directory = initial_directory
+
+        if load_saved:
+            self.load_existing_playlists()
 
         # Create UI elements
         self.init_gui()
@@ -102,6 +108,10 @@ class MP3_Player(QMainWindow):
         dock_content = QWidget(self)
         dock_layout = QVBoxLayout(dock_content)
 
+        # create buttons for all saved playlists
+        if self.existing_playlists:
+            self.create_saved_playlists_buttons(dock_layout)
+
         # Spacer to keep buttons at the bottom
         dock_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
@@ -127,6 +137,12 @@ class MP3_Player(QMainWindow):
         dock_widget.setWidget(dock_content)
         self.addDockWidget(Qt.LeftDockWidgetArea, dock_widget)
 
+    def create_saved_playlists_buttons(self, dock_layout: QVBoxLayout):
+        for name in self.existing_playlists.keys():
+            play_button = QPushButton(name, self)
+            play_button.clicked.connect(lambda: self.load_playlist(play_button.text()))
+            dock_layout.addWidget(play_button)
+
     def remove_audio_from_playlist(self):
         index = self.playlist_list.row(self.playlist_list.currentItem())
         self.playlist_list.takeItem(index)
@@ -139,14 +155,17 @@ class MP3_Player(QMainWindow):
         # Add actions to the context menu
         action_play = QAction("Play", self)
         action_remove = QAction("Remove", self)
+        action_add_to_playlist = QAction("Add to playlist", self)
 
         # Connect actions to slots (optional)
         action_play.triggered.connect(self.play_selected)
         action_remove.triggered.connect(self.remove_audio_from_playlist)
+        action_add_to_playlist.triggered.connect(self.add_to_playlist)
 
         # Add actions to the context menu
         context_menu.addAction(action_play)
         context_menu.addAction(action_remove)
+        context_menu.addAction(action_add_to_playlist)
 
         # Show the context menu at the mouse position
         context_menu.exec(event.globalPos())
@@ -239,6 +258,17 @@ class MP3_Player(QMainWindow):
         self.media_files.extend(files) # Add the selected songs to the playlist
 
         self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
+
+    def load_playlist(self, name: str):
+        self.playlist_list.clear()
+        self.playlist_list.addItems([os.path.basename(file) for file in self.existing_playlists[name]]) # Display the Songnames in the playlist in the widget
+
+    def load_existing_playlists(self) -> None:
+        loader = Saved_Playlists_handler()
+        self.existing_playlists: dict[str, str] = loader.load_playlists()
+
+    def add_to_playlist(self) -> None:
+        pass
 
     def load_single_files(self, clear: bool = False) -> None:
         # Open file dialog to select MP3 files
