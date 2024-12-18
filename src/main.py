@@ -1,7 +1,7 @@
 import sys, os
 
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget
-from PySide6.QtCore import Qt, QTimer, QTranslator, QLocale
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction
 import pygame
 
@@ -15,11 +15,8 @@ class MP3_Player(QMainWindow):
     def __init__(self, initial_directory: str | None = None, load_saved: bool = True, parent = None):
         super().__init__(parent)
 
-        # Load localization
-        self.load_translation()
-
-        self.setWindowTitle(self.tr("MP3 Player"))
-        self.setGeometry(100, 100, 700, 500)
+        self.setWindowTitle("MP3 Player")
+        self.setGeometry(100, 100, 800, 500)
 
         # Initialize Pygame mixer
         pygame.mixer.init()
@@ -40,15 +37,6 @@ class MP3_Player(QMainWindow):
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(100)  # Update progress every 100 ms
 
-    def load_translation(self):
-        translator = QTranslator()
-        locale = QLocale.system().name()  # Get the system's default locale (e.g., 'en_US')
-        translation_file = os.path.join("locale", f"{locale}.qm")  # Assumes translation files are in a 'locale' folder
-
-        if os.path.exists(translation_file):
-            translator.load(translation_file)
-            app.installTranslator(translator)
-
     def init_gui(self) -> None:
         # Create the central widget layout
         central_widget = QWidget(self)
@@ -57,7 +45,7 @@ class MP3_Player(QMainWindow):
         # Create a main layout for the central widget
         central_layout = QVBoxLayout(central_widget)
 
-        self.current_song = QLabel(self.tr(f"Song: {self.current_music}"), self)
+        self.current_song = QLabel(f"Song: {self.current_music}", self)
 
         # Set the font size using QFont
         font = self.current_song.font()
@@ -94,7 +82,7 @@ class MP3_Player(QMainWindow):
         self.progress_slider.setRange(0, 100)
         self.progress_slider.sliderPressed.connect(self.seek_audio)
         self.progress_slider.setHidden(True)
-        central_layout.addWidget(QLabel(self.tr("Progress")))
+        central_layout.addWidget(QLabel("Progress"))
         central_layout.addWidget(self.progress_slider)
 
         # Volume slider (bottom)
@@ -102,12 +90,12 @@ class MP3_Player(QMainWindow):
         self.volume_slider.setRange(0, 100)
         self.volume_slider.setValue(50)
         self.volume_slider.valueChanged.connect(self.set_volume)
-        central_layout.addWidget(QLabel(self.tr("Volume")))
+        central_layout.addWidget(QLabel("Volume"))
         central_layout.addWidget(self.volume_slider)
 
     def create_controls_dock(self) -> None:
         # Create a QWidget to house the left-side controls
-        dock_widget = QDockWidget(self.tr("Controls"), self)
+        dock_widget = QDockWidget("Controls", self)
         dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
         dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
@@ -118,21 +106,21 @@ class MP3_Player(QMainWindow):
         dock_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Play / Pause button
-        self.play_button = QPushButton(self.tr("Play"), self)
+        self.play_button = QPushButton("Play", self)
         self.play_button.clicked.connect(self.toggle_play_pause)
         dock_layout.addWidget(self.play_button)
 
-        self.play_playlist_button = QPushButton(self.tr("Play Playlist"), self)
+        self.play_playlist_button = QPushButton("Play Playlist", self)
         self.play_playlist_button.clicked.connect(self.play_playlist)
         dock_layout.addWidget(self.play_playlist_button)
 
         # Stop button
-        self.stop_button = QPushButton(self.tr("Stop"), self)
+        self.stop_button = QPushButton("Stop", self)
         self.stop_button.clicked.connect(self.stop_audio)
         dock_layout.addWidget(self.stop_button)
 
         # Playlist button
-        self.playlist_button = QPushButton(self.tr("Add from Folder"), self)
+        self.playlist_button = QPushButton("Add from Folder", self)
         self.playlist_button.clicked.connect(lambda: self.load_playlist_folder(False))
         dock_layout.addWidget(self.playlist_button)
 
@@ -149,8 +137,8 @@ class MP3_Player(QMainWindow):
         context_menu = QMenu(self)
 
         # Add actions to the context menu
-        action_play = QAction(self.tr("Play"), self)
-        action_remove = QAction(self.tr("Remove"), self)
+        action_play = QAction("Play", self)
+        action_remove = QAction("Remove", self)
 
         # Connect actions to slots (optional)
         action_play.triggered.connect(self.play_selected)
@@ -168,19 +156,19 @@ class MP3_Player(QMainWindow):
         menubar = self.menuBar()
 
         # Create "File" menu
-        file_menu = QMenu(self.tr("File"), self)
+        file_menu = QMenu("File", self)
         menubar.addMenu(file_menu)
 
         # Add actions to the "File" menu
-        open_action = QAction(self.tr("Open"), self)
+        open_action = QAction("Open", self)
         open_action.triggered.connect(self.load_single_files)
         file_menu.addAction(open_action)
 
-        exit_action = QAction(self.tr("Exit"), self)
+        exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
-        clear_action = QAction(self.tr("Clear"), self)
+        clear_action = QAction("Clear", self)
         clear_action.triggered.connect(self.clear_playlist)
         file_menu.addAction(clear_action)
 
@@ -202,8 +190,11 @@ class MP3_Player(QMainWindow):
 
         self.playlist_thread.start()
 
-    def update_current_song(self, song: str) -> None:
-        self.current_song.setText(f"Song: {self.current_music}")
+    def update_current_song(self, song: str | None = None) -> None:
+        if song:
+            self.current_song.setText(f"Song: {os.path.basename(song)}")
+
+        else: self.current_song.setText(f"Song: {os.path.basename(self.current_music)}")
 
     def on_playlist_finished(self) -> None:
         self.playlist_thread.stop()
@@ -279,7 +270,7 @@ class MP3_Player(QMainWindow):
             self.current_music = self.media_files[self.current_index]
         else: self.current_music = media_file
 
-        self.current_song.setText(f"Song: {self.current_music}")
+        self.current_song.setText(f"Song: {os.path.basename(self.current_music)}")
         pygame.mixer.music.load(self.current_music)
         pygame.mixer.music.play()
 
