@@ -1,8 +1,9 @@
 import sys, os
 
-from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget
+from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog
 from PySide6.QtGui import QAction, QContextMenuEvent
 from PySide6.QtCore import Qt, QTimer
+from functools import partial
 import pygame
 
 if __name__ == "__main__":
@@ -19,21 +20,24 @@ class MP3_Player(QMainWindow):
         super().__init__(parent)
 
         self.setWindowTitle("MP3 Player")
-        self.setGeometry(100, 100, 800, 500)
+        self.setGeometry(100, 100, 1000, 600)
 
         # Initialize Pygame mixer
         pygame.mixer.init()
 
         # List to keep track of loaded media files
-        self.media_files = []
-        self.current_index = 0
-        self.current_music = None
-        self.music_length = 0
-        self.audio_file_types = (".mp3", ".wav")
-        self.initial_directory = initial_directory
+        self.media_files: list[str] = []
+        self.current_index: int = 0
+        self.current_music: str | None = None
+        self.music_length: int = 0
+        self.audio_file_types: tuple[str] = (".mp3", ".wav")
+        self.initial_directory: str | None = initial_directory
+
+        self.loader = Saved_Playlists_handler()
 
         if load_saved:
             self.load_existing_playlists()
+        else: self.existing_playlists = None
 
         # Create UI elements
         self.init_gui()
@@ -100,20 +104,27 @@ class MP3_Player(QMainWindow):
         central_layout.addWidget(self.volume_slider)
 
     def create_controls_dock(self) -> None:
-        # Create a QWidget to house the left-side controls
-        dock_widget = QDockWidget("Controls", self)
-        dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
-        dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        """Recreate the entire dock widget with updated content."""
+        # Remove the previous dock widget if it exists
+        if hasattr(self, 'dock_widget'):
+            self.removeDockWidget(self.dock_widget)
+            del self.dock_widget
+
+        # Create a new dock widget
+        self.dock_widget = QDockWidget("Controls", self)
+        self.dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
+        self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
         dock_content = QWidget(self)
         dock_layout = QVBoxLayout(dock_content)
 
-        # create buttons for all saved playlists
+        # Create buttons for all saved playlists if any
         if self.existing_playlists:
-            self.create_saved_playlists_buttons(dock_layout)
+            self.create_saved_playlists_button(dock_layout)
 
-        # Spacer to keep buttons at the bottom
-        dock_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        # Spacer to keep buttons at the bottom if no playlists exist
+        if not self.existing_playlists:
+            dock_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Play / Pause button
         self.play_button = QPushButton("Play", self)
@@ -129,21 +140,47 @@ class MP3_Player(QMainWindow):
         self.stop_button.clicked.connect(self.stop_audio)
         dock_layout.addWidget(self.stop_button)
 
+        # Save Playlist button
+        self.save_playlist_button = QPushButton("Save Playlist", self)
+        self.save_playlist_button.clicked.connect(self.save_playlist)
+        dock_layout.addWidget(self.save_playlist_button)
+
         # Playlist button
         self.playlist_button = QPushButton("Add from Folder", self)
         self.playlist_button.clicked.connect(lambda: self.load_playlist_folder(False))
         dock_layout.addWidget(self.playlist_button)
 
-        dock_widget.setWidget(dock_content)
-        self.addDockWidget(Qt.LeftDockWidgetArea, dock_widget)
+        self.dock_widget.setWidget(dock_content)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
 
-    def create_saved_playlists_buttons(self, dock_layout: QVBoxLayout):
+    def create_saved_playlists_button(self, dock_layout: QVBoxLayout) -> None:
+        """Create buttons for each saved playlist."""
+        # Create a QScrollArea to make the list scrollable (only once)
+        button_container = QWidget()
+        button_layout = QVBoxLayout(button_container)
+
+        scroll_area = QScrollArea(self)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setWidget(button_container)
+
+        # Add the scroll area to the dock layout
+        dock_layout.addWidget(scroll_area)
+
+        # Add new buttons based on the updated playlists
         for name in self.existing_playlists.keys():
-            play_button = QPushButton(name, self)
-            play_button.clicked.connect(lambda: self.load_playlist(play_button.text()))
-            dock_layout.addWidget(play_button)
+            playlist_button = QPushButton(name, self)
+            playlist_button.clicked.connect(partial(self.load_playlist, name))
+            button_layout.addWidget(playlist_button)
 
-    def remove_audio_from_playlist(self):
+        # Add a spacer to ensure buttons stay at the top if there is extra space
+        spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        button_layout.addSpacerItem(spacer)
+
+    def reload_dock_widget(self) -> None:
+        """Reload the entire dock widget to reflect changes in existing playlists."""
+        self.create_controls_dock()
+
+    def remove_audio_from_playlist(self) -> None:
         index = self.playlist_list.row(self.playlist_list.currentItem())
         self.playlist_list.takeItem(index)
         self.media_files.pop(index)
@@ -201,11 +238,14 @@ class MP3_Player(QMainWindow):
 
         # Create and start the playlist thread
         self.playlist_thread = PlaylistThread(self.media_files)
+
+        self.playlist_thread.is_paused.emit(False)
         self.playlist_thread.song_changed.connect(self.update_current_song)
         self.playlist_thread.hide_progress_slider.connect(self.progress_slider.setHidden)
         self.playlist_thread.finished.connect(self.on_playlist_finished)
 
         self.play_playlist_button.setText("Stop Playlist")
+        self.play_button.setText("Pause")
 
         self.playlist_thread.start()
 
@@ -226,6 +266,9 @@ class MP3_Player(QMainWindow):
 
     def toggle_play_pause(self) -> None:
         if pygame.mixer.music.get_busy():
+            if self.playlist_thread:
+                self.playlist_thread.is_paused.emit(True)
+
             pygame.mixer.music.pause()
             self.play_button.setText("Play")
             return
@@ -235,6 +278,8 @@ class MP3_Player(QMainWindow):
         else:
             self.progress_slider.setHidden(False)
             pygame.mixer.music.unpause()
+            if self.playlist_thread:
+                self.playlist_thread.is_paused.emit(False)
 
         self.play_button.setText("Pause")
 
@@ -262,12 +307,23 @@ class MP3_Player(QMainWindow):
     def load_playlist(self, name: str):
         self.playlist_list.clear()
         self.playlist_list.addItems([os.path.basename(file) for file in self.existing_playlists[name]]) # Display the Songnames in the playlist in the widget
+        self.media_files = self.existing_playlists[name]
 
     def load_existing_playlists(self) -> None:
-        loader = Saved_Playlists_handler()
-        self.existing_playlists: dict[str, str] = loader.load_playlists()
+        self.existing_playlists: dict[str, str] = self.loader.load_playlists()
 
-    def add_to_playlist(self) -> None:
+    def save_playlist(self) -> None:
+        # Create a dialog that asks the user for their name
+        playlist_name, ok = QInputDialog.getText(self, "Enter Name", "Please enter the name of the Playlist:")
+
+        if ok and playlist_name:
+            # Show the name in a message box if it's provided
+            self.loader.save_playlist(playlist_name, self.media_files)
+
+        self.load_existing_playlists()
+        self.reload_dock_widget()
+
+    def add_to_playlist(self) -> None: # TODO
         pass
 
     def load_single_files(self, clear: bool = False) -> None:
@@ -295,6 +351,7 @@ class MP3_Player(QMainWindow):
         if not self.media_files:
             return
 
+        self.play_button.setText("Pause")
         self.progress_slider.setHidden(False)
         if not media_file:
             self.current_music = self.media_files[self.current_index]
