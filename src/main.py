@@ -1,8 +1,8 @@
 import sys, os
 
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget
+from PySide6.QtGui import QAction, QContextMenuEvent
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QAction
 import pygame
 
 if __name__ == "__main__":
@@ -132,7 +132,7 @@ class MP3_Player(QMainWindow):
         self.playlist_list.takeItem(index)
         self.media_files.pop(index)
 
-    def contextMenuEvent(self, event) -> None:
+    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         # Create the context menu
         context_menu = QMenu(self)
 
@@ -225,7 +225,7 @@ class MP3_Player(QMainWindow):
         pygame.mixer.music.unload()
         self.play_button.setText("Play")
 
-    def set_volume(self, value) -> None:
+    def set_volume(self, value: float) -> None:
         pygame.mixer.music.set_volume(value / 100)
 
     def load_playlist_folder(self, clear: bool = True) -> None:
