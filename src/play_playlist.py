@@ -3,10 +3,10 @@ import pygame
 
 
 class PlaylistThread(QThread):
-    song_changed = Signal(str)
-    hide_progress_slider = Signal(bool)
-    is_alive = True
-    is_paused = Signal(bool)
+    song_changed: Signal = Signal(str)
+    hide_progress_slider: Signal = Signal(bool)
+    is_alive: bool = True
+    is_paused: Signal = Signal(bool)
 
     def __init__(self, media_files: list[str], parent=None):
         super().__init__(parent)
@@ -31,7 +31,7 @@ class PlaylistThread(QThread):
                 self.msleep(100)  # Sleep to avoid blocking the thread
 
         self.hide_progress_slider.emit(True)
-    
+
     def terminate(self):
         self.is_alive = False
         pygame.mixer.music.stop()
@@ -39,6 +39,6 @@ class PlaylistThread(QThread):
         self.song_changed.emit(None)
         self.msleep(100)
         return super().terminate()
-    
+
     def stop(self):
         self.terminate()
