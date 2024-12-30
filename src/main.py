@@ -185,6 +185,12 @@ class MP3_Player(QMainWindow):
         self.playlist_list.takeItem(index)
         self.media_files.pop(index)
 
+        # remove from saved playlist
+        if self.existing_playlists:
+            for playlist in self.existing_playlists.values():
+                if self.current_music in playlist:
+                    self.loader.remove_from_playlist(playlist, self.current_music)
+
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         # Create the context menu
         context_menu = QMenu(self)
@@ -228,7 +234,7 @@ class MP3_Player(QMainWindow):
         clear_action.triggered.connect(self.clear_playlist)
         file_menu.addAction(clear_action)
 
-    def clear_playlist(self):
+    def clear_playlist(self) -> None:
             self.playlist_list.clear()  # Clear the playlist display
             self.media_files.clear()  # Clear the playlist
 
@@ -315,7 +321,7 @@ class MP3_Player(QMainWindow):
 
         self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
 
-    def load_playlist(self, name: str):
+    def load_playlist(self, name: str) -> None:
         self.playlist_list.clear()
         self.playlist_list.addItems([os.path.basename(file) for file in self.existing_playlists[name]]) # Display the Songnames in the playlist in the widget
         self.media_files = self.existing_playlists[name]
@@ -334,8 +340,14 @@ class MP3_Player(QMainWindow):
         self.load_existing_playlists()
         self.reload_dock_widget()
 
-    def add_to_playlist(self) -> None: # TODO
-        pass # TODO
+    def add_to_playlist(self) -> None:
+        current_item = self.playlist_list.currentItem()
+        if current_item:
+            playlist_name, ok = QInputDialog.getText(self, "Enter Playlist Name", "Please enter the name of the Playlist:")
+            if ok and playlist_name:
+                self.loader.add_to_playlist(playlist_name, self.media_files[self.playlist_list.row(current_item)])
+                self.load_existing_playlists()
+                self.reload_dock_widget()
 
     def load_single_files(self, clear: bool = False) -> None:
         # Open file dialog to select MP3 files

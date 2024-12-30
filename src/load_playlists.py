@@ -9,7 +9,7 @@ class Saved_Playlists_handler:
                                                 "Playlists"
                                                 ))
 
-    def load_playlists(self):
+    def load_playlists(self) -> dict[str, list[str]]:
         if not os.path.isdir(self.playlists_path):
             return {}
 
@@ -31,6 +31,20 @@ class Saved_Playlists_handler:
         with open(file_path, "w") as file:
             json.dump(playlist, file)  # Save the playlist in JSON format
 
+    def remove_from_playlist(self, playlist_name: str, song_path: str):
+        if not playlist_name in self.load_playlists().keys():
+            return
+        playlist = self.load_playlists().get(playlist_name, [])
+        playlist.remove(song_path)
+        self.save_playlist(playlist_name, playlist)
+
+    def add_to_playlist(self, playlist_name: str, song_path: str):
+        if not playlist_name in self.load_playlists().keys():
+            self.save_playlist(playlist_name, [song_path])
+            return
+        playlist = self.load_playlists().get(playlist_name, [])
+        playlist.append(song_path)
+        self.save_playlist(playlist_name, playlist)
 
 if __name__ == "__main__":
     loader = Saved_Playlists_handler()
