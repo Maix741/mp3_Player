@@ -3,22 +3,35 @@ import pygame
 
 
 class PlaylistThread(QThread):
+    """A QThread to play a list of media files."""
     song_changed: Signal = Signal(str)
     disable_progress_slider: Signal = Signal(bool)
     is_alive: bool = True
     is_paused: Signal = Signal(bool)
 
-    def __init__(self, media_files: list[str], parent=None):
+    def __init__(self, media_files: list[str], parent=None) -> None:
+        """Initialize the Playlist Thread.
+
+        Args:
+            media_files (list[str]): The list of media files to play.
+            parent (QObject, optional): The parent object. Defaults to None.
+        """
         super().__init__(parent)
         self.media_files = media_files
         self._is_paused = False
         self.is_paused.connect(self.update_paused_state)
 
     @Slot(bool)
-    def update_paused_state(self, paused: bool):
+    def update_paused_state(self, paused: bool) -> None:
+        """Update the paused state of the thread.
+
+        Args:
+            paused (bool): The new paused state.
+        """
         self._is_paused = paused
 
-    def run(self):
+    def run(self) -> None:
+        """Start playing the Playlist."""
         for media_file in self.media_files:
             if not self.is_alive: break
 
@@ -40,6 +53,7 @@ class PlaylistThread(QThread):
         self.disable_progress_slider.emit(True)
 
     def terminate(self):
+        """Terminate the Playlist Thread."""
         self.is_alive = False
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
@@ -48,4 +62,5 @@ class PlaylistThread(QThread):
         return super().terminate()
 
     def stop(self):
+        """Stop the Playlist Thread."""
         self.terminate()
