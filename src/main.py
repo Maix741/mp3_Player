@@ -91,7 +91,7 @@ class MP3_Player(QMainWindow):
         self.progress_slider = QSlider(Qt.Horizontal, self)
         self.progress_slider.setRange(0, 100)
         self.progress_slider.sliderPressed.connect(self.seek_audio)
-        self.progress_slider.setHidden(True)
+        self.progress_slider.setDisabled(True)
         central_layout.addWidget(QLabel("Progress"))
         central_layout.addWidget(self.progress_slider)
 
@@ -232,6 +232,14 @@ class MP3_Player(QMainWindow):
             self.playlist_list.clear()  # Clear the playlist display
             self.media_files.clear()  # Clear the playlist
 
+            self.current_index = 0
+            self.current_music = None
+            self.current_song.setText("Song: None")
+
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.stop()
+                pygame.mixer.music.unload()
+
     def play_playlist(self) -> None:
         if self.play_playlist_button.text() == "Stop Playlist":
             self.on_playlist_finished()
@@ -241,7 +249,7 @@ class MP3_Player(QMainWindow):
 
         self.playlist_thread.is_paused.emit(False)
         self.playlist_thread.song_changed.connect(self.update_current_song)
-        self.playlist_thread.hide_progress_slider.connect(self.progress_slider.setHidden)
+        self.playlist_thread.disable_progress_slider.connect(self.progress_slider.setDisabled)
         self.playlist_thread.finished.connect(self.on_playlist_finished)
 
         self.play_playlist_button.setText("Stop Playlist")
@@ -253,7 +261,9 @@ class MP3_Player(QMainWindow):
         if song:
             self.current_song.setText(f"Song: {os.path.basename(song)}")
 
-        else: self.current_song.setText(f"Song: {os.path.basename(self.current_music)}")
+        elif self.current_music: self.current_song.setText(f"Song: {os.path.basename(self.current_music)}")
+
+        else: self.current_song.setText("Song: None")
 
     def on_playlist_finished(self) -> None:
         self.playlist_thread.stop()
@@ -261,8 +271,8 @@ class MP3_Player(QMainWindow):
         self.play_playlist_button.setText("Play Playlist")
         self.play_button.setText("Play")
 
-        self.progress_slider.setHidden(True)
-        self.progress_slider.setHidden(True)
+        self.progress_slider.setDisabled(True)
+        self.progress_slider.setDisabled(True)
 
     def toggle_play_pause(self) -> None:
         if pygame.mixer.music.get_busy():
@@ -273,10 +283,11 @@ class MP3_Player(QMainWindow):
             self.play_button.setText("Play")
             return
 
-        if self.current_index == 0:  # If no track is selected, play the first one
+        if self.current_index == 0 and not self.playlist_thread:  # If no track is selected, play the first one
             self.play_next()
+
         else:
-            self.progress_slider.setHidden(False)
+            self.progress_slider.setDisabled(False)
             pygame.mixer.music.unpause()
             if self.playlist_thread:
                 self.playlist_thread.is_paused.emit(False)
@@ -284,7 +295,7 @@ class MP3_Player(QMainWindow):
         self.play_button.setText("Pause")
 
     def stop_audio(self) -> None:
-        self.progress_slider.setHidden(True)
+        self.progress_slider.setDisabled(True)
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
         self.play_button.setText("Play")
@@ -324,7 +335,7 @@ class MP3_Player(QMainWindow):
         self.reload_dock_widget()
 
     def add_to_playlist(self) -> None: # TODO
-        pass
+        pass # TODO
 
     def load_single_files(self, clear: bool = False) -> None:
         # Open file dialog to select MP3 files
@@ -352,7 +363,7 @@ class MP3_Player(QMainWindow):
             return
 
         self.play_button.setText("Pause")
-        self.progress_slider.setHidden(False)
+        self.progress_slider.setDisabled(False)
         if not media_file:
             self.current_music = self.media_files[self.current_index]
         else: self.current_music = media_file

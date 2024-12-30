@@ -1,16 +1,22 @@
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import Signal, Slot, QThread
 import pygame
 
 
 class PlaylistThread(QThread):
     song_changed: Signal = Signal(str)
-    hide_progress_slider: Signal = Signal(bool)
+    disable_progress_slider: Signal = Signal(bool)
     is_alive: bool = True
     is_paused: Signal = Signal(bool)
 
     def __init__(self, media_files: list[str], parent=None):
         super().__init__(parent)
         self.media_files = media_files
+        self._is_paused = False
+        self.is_paused.connect(self.update_paused_state)
+
+    @Slot(bool)
+    def update_paused_state(self, paused: bool):
+        self._is_paused = paused
 
     def run(self):
         for media_file in self.media_files:
@@ -18,19 +24,20 @@ class PlaylistThread(QThread):
 
             pygame.mixer.music.load(media_file)
             pygame.mixer.music.play()
+            self.is_paused.emit(False)
 
             # Emit signal to update song on the GUI
             self.song_changed.emit(media_file)
 
             # Wait until the song is finished
-            while (pygame.mixer.music.get_busy() and self.is_alive) or (self.is_paused and self.is_alive):
-                if not self.is_paused and not pygame.mixer.music.get_busy():
+            while (pygame.mixer.music.get_busy() and self.is_alive) or (self._is_paused and self.is_alive):
+                if not self._is_paused and not pygame.mixer.music.get_busy():
                     pygame.mixer.music.unpause()
 
-                self.hide_progress_slider.emit(False)
+                self.disable_progress_slider.emit(False)
                 self.msleep(100)  # Sleep to avoid blocking the thread
 
-        self.hide_progress_slider.emit(True)
+        self.disable_progress_slider.emit(True)
 
     def terminate(self):
         self.is_alive = False
