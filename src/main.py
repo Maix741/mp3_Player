@@ -277,7 +277,7 @@ class MP3_Player(QMainWindow):
 
             self.current_index = 0
             self.current_music = None
-            self.current_song.setText("Song: None")
+            self.update_current_song()
 
             if pygame.mixer.music.get_busy():
                 pygame.mixer.music.stop()
@@ -439,7 +439,7 @@ class MP3_Player(QMainWindow):
             self.current_music = self.media_files[self.current_index]
         else: self.current_music = media_file
 
-        self.current_song.setText(f"Song: {os.path.basename(self.current_music)}")
+        self.update_current_song()
         pygame.mixer.music.load(self.current_music)
         pygame.mixer.music.play()
 
