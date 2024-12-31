@@ -3,6 +3,7 @@ import sys, os
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog
 from PySide6.QtGui import QAction, QContextMenuEvent
 from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QIcon
 from functools import partial
 import pygame
 
@@ -58,6 +59,8 @@ class MP3_Player(QMainWindow):
 
     def init_gui(self) -> None:
         """Initialize the GUI elements."""
+        self.setWindowIcon(QIcon("src/assets/icon.png"))
+
         # Create the central widget layout
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
