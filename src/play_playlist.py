@@ -48,7 +48,7 @@ class PlaylistThread(QThread):
                     pygame.mixer.music.unpause()
 
                 self.disable_progress_slider.emit(False)
-                self.msleep(100)  # Sleep to avoid blocking the thread
+                self.msleep(200)  # Sleep to avoid blocking the thread
 
         self.disable_progress_slider.emit(True)
 

@@ -72,6 +72,16 @@ class Saved_Playlists_handler:
         playlist.append(song_path)
         self.save_playlist(playlist_name, playlist)
 
+    def delete_playlist(self, playlist_name: str) -> None:
+        """Delete a Playlist.
+
+        Args:
+            playlist_name (str): The name of the Playlist.
+        """
+        if not playlist_name in self.load_playlists().keys():
+            return
+        os.remove(os.path.join(self.playlists_path, f"{playlist_name}.json"))
+
 
 if __name__ == "__main__":
     loader = Saved_Playlists_handler()

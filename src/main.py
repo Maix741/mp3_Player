@@ -182,11 +182,30 @@ class MP3_Player(QMainWindow):
         for name in self.existing_playlists.keys():
             playlist_button = QPushButton(name, self)
             playlist_button.clicked.connect(partial(self.load_playlist, name))
+            playlist_button.setContextMenuPolicy(Qt.CustomContextMenu)
+            playlist_button.customContextMenuRequested.connect(partial(self.show_playlist_context_menu, name, playlist_button))
             button_layout.addWidget(playlist_button)
 
         # Add a spacer to ensure buttons stay at the top if there is extra space
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         button_layout.addSpacerItem(spacer)
+
+    def show_playlist_context_menu(self, playlist_name: str, playlist_button: QPushButton, position) -> None:
+        """Show context menu for the saved playlists."""
+        context_menu = QMenu(self)
+
+        delete_action = QAction("Delete", self)
+        delete_action.triggered.connect(partial(self.delete_playlist, playlist_name))
+
+        context_menu.addAction(delete_action)
+        global_position = playlist_button.mapToGlobal(position)
+        context_menu.exec(global_position)
+
+    def delete_playlist(self, playlist_name: str) -> None:
+        """Delete the selected playlist."""
+        self.loader.delete_playlist(playlist_name)
+        self.load_existing_playlists()
+        self.reload_dock_widget()
 
     def reload_dock_widget(self) -> None:
         """Reload the entire dock widget to reflect changes in existing playlists."""
@@ -206,26 +225,28 @@ class MP3_Player(QMainWindow):
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         """Create a context menu for the playlist."""
-        # Create the context menu
-        context_menu = QMenu(self)
+        # Check if the event position is within the playlist area
+        if self.playlist_list.geometry().contains(event.pos()):
+            # Create the context menu
+            context_menu = QMenu(self)
 
-        # Add actions to the context menu
-        action_play = QAction("Play", self)
-        action_remove = QAction("Remove", self)
-        action_add_to_playlist = QAction("Add to playlist", self)
+            # Add actions to the context menu
+            action_play = QAction("Play", self)
+            action_remove = QAction("Remove", self)
+            action_add_to_playlist = QAction("Add to playlist", self)
 
-        # Connect actions to slots (optional)
-        action_play.triggered.connect(self.play_selected)
-        action_remove.triggered.connect(self.remove_audio_from_playlist)
-        action_add_to_playlist.triggered.connect(self.add_to_playlist)
+            # Connect actions to slots (optional)
+            action_play.triggered.connect(self.play_selected)
+            action_remove.triggered.connect(self.remove_audio_from_playlist)
+            action_add_to_playlist.triggered.connect(self.add_to_playlist)
 
-        # Add actions to the context menu
-        context_menu.addAction(action_play)
-        context_menu.addAction(action_remove)
-        context_menu.addAction(action_add_to_playlist)
+            # Add actions to the context menu
+            context_menu.addAction(action_play)
+            context_menu.addAction(action_remove)
+            context_menu.addAction(action_add_to_playlist)
 
-        # Show the context menu at the mouse position
-        context_menu.exec(event.globalPos())
+            # Show the context menu at the mouse position
+            context_menu.exec(event.globalPos())
 
     def create_menubar(self) -> None:
         """Create the menu bar with file actions."""
@@ -282,12 +303,19 @@ class MP3_Player(QMainWindow):
 
     def update_current_song(self, song: str | None = None) -> None:
         """Update the current song label with the provided song name."""
+        max_length = 50  # Define the maximum length for the song name
+
         if song:
-            self.current_song.setText(f"Song: {os.path.basename(song)}")
+            display_name = os.path.basename(song)
+        elif self.current_music:
+            display_name = os.path.basename(self.current_music)
+        else:
+            display_name = "None"
 
-        elif self.current_music: self.current_song.setText(f"Song: {os.path.basename(self.current_music)}")
+        if len(display_name) > max_length:
+            display_name = display_name[:max_length] + "..."
 
-        else: self.current_song.setText("Song: None")
+        self.current_song.setText(f"Song: {display_name}")
 
     def on_playlist_finished(self) -> None:
         """Stop the playlist and reset the buttons."""
@@ -325,7 +353,8 @@ class MP3_Player(QMainWindow):
         self.progress_slider.setDisabled(True)
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
-        self.play_button.setText("Play")
+        if not self.playlist_thread: # If a playlist is playing, don't reset the play button
+            self.play_button.setText("Play")
 
     def set_volume(self, value: float) -> None:
         """Set the volume of the audio."""
