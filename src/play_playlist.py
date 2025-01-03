@@ -1,3 +1,5 @@
+import random
+
 from PySide6.QtCore import Signal, Slot, QThread
 import pygame
 
@@ -9,7 +11,7 @@ class PlaylistThread(QThread):
     is_alive: bool = True
     is_paused: Signal = Signal(bool)
 
-    def __init__(self, media_files: list[str], parent=None) -> None:
+    def __init__(self, media_files: list[str], shuffle: bool = False, parent=None) -> None:
         """Initialize the Playlist Thread.
 
         Args:
@@ -18,6 +20,8 @@ class PlaylistThread(QThread):
         """
         super().__init__(parent)
         self.media_files = media_files
+        if shuffle:
+            random.shuffle(self.media_files)
         self._is_paused = False
         self.is_paused.connect(self.update_paused_state)
 

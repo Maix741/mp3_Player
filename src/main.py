@@ -18,7 +18,7 @@ else:
 
 class MP3_Player(QMainWindow):
     """A simple MP3 player application using Pygame and PySide6."""
-    def __init__(self, initial_directory: str | None = None, load_saved: bool = True, parent = None) -> None:
+    def __init__(self, initial_directory: str | None = None, load_saved: bool = True, shuffle: bool = False, parent = None) -> None:
         """Initialize the MP3 Player.
 
         Args:
@@ -34,13 +34,14 @@ class MP3_Player(QMainWindow):
         # Initialize Pygame mixer
         pygame.mixer.init()
 
-        # List to keep track of loaded media files
-        self.media_files: list[str] = []
+        # Initialize variables
+        self.media_files: list[str] = [] # List to keep track of loaded media files
         self.current_index: int = 0
         self.current_music: str | None = None
         self.music_length: int = 0
         self.audio_file_types: tuple[str] = (".mp3", ".wav", ".ogg", ".flac")
         self.initial_directory: str | None = initial_directory
+        self.shuffle: bool = shuffle
 
         self.loader = Saved_Playlists_handler()
 
@@ -292,7 +293,7 @@ class MP3_Player(QMainWindow):
             self.on_playlist_finished()
 
         # Create and start the playlist thread
-        self.playlist_thread = PlaylistThread(self.media_files)
+        self.playlist_thread = PlaylistThread(self.media_files, self.shuffle)
 
         self.playlist_thread.is_paused.emit(False)
         self.playlist_thread.song_changed.connect(self.update_current_song)
