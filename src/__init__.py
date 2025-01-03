@@ -1,1 +1,1 @@
-from .main import *
+from .mp3_player import *
