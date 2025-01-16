@@ -10,6 +10,7 @@ class PlaylistThread(QThread):
     disable_progress_slider: Signal = Signal(bool)
     is_alive: bool = True
     is_paused: Signal = Signal(bool)
+    is_looping: Signal = Signal(bool)
 
     def __init__(self, media_files: list[str], shuffle: bool = False, parent=None) -> None:
         """Initialize the Playlist Thread.
@@ -24,6 +25,7 @@ class PlaylistThread(QThread):
             random.shuffle(self.media_files)
         self._is_paused = False
         self.is_paused.connect(self.update_paused_state)
+        self.is_looping.connect(self.update_looping_state)
 
     @Slot(bool)
     def update_paused_state(self, paused: bool) -> None:
@@ -34,6 +36,15 @@ class PlaylistThread(QThread):
         """
         self._is_paused = paused
 
+    @Slot(bool)
+    def update_looping_state(self, looping: bool) -> None:
+        """Update the looping state of the thread.
+
+        Args:
+            looping (bool): The new looping state.
+        """
+        self._is_looping = looping
+
     def run(self) -> None:
         """Start playing the Playlist."""
         for media_file in self.media_files:
@@ -42,14 +53,17 @@ class PlaylistThread(QThread):
             pygame.mixer.music.load(media_file)
             pygame.mixer.music.play()
             self.is_paused.emit(False)
+            self.is_looping.emit(False)
 
             # Emit signal to update song on the GUI
             self.song_changed.emit(media_file)
 
             # Wait until the song is finished
-            while (pygame.mixer.music.get_busy() and self.is_alive) or (self._is_paused and self.is_alive):
+            while (pygame.mixer.music.get_busy() and self.is_alive) or (self._is_paused and self.is_alive) or (self._is_looping and self.is_alive):
                 if not self._is_paused and not pygame.mixer.music.get_busy():
-                    pygame.mixer.music.unpause()
+                    if self.is_looping:
+                        pygame.mixer.music.play()
+                    else: pygame.mixer.music.unpause()
 
                 self.disable_progress_slider.emit(False)
                 self.msleep(200)  # Sleep to avoid blocking the thread

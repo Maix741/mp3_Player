@@ -1,6 +1,6 @@
 import sys, os
 
-from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog
+from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout
 from PySide6.QtGui import QAction, QContextMenuEvent
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QIcon
@@ -42,8 +42,12 @@ class MP3_Player(QMainWindow):
         self.audio_file_types: tuple[str] = (".mp3", ".wav", ".ogg", ".flac")
         self.initial_directory: str | None = initial_directory
         self.shuffle: bool = shuffle
+        self.max_previously_saved: int = 10
+        self.previously_played: list[str] = []
+        self.is_looping: bool = False
 
         self.loader = Saved_Playlists_handler()
+        self.playlist_thread: PlaylistThread | None = None
 
         if load_saved:
             self.load_existing_playlists()
@@ -60,7 +64,11 @@ class MP3_Player(QMainWindow):
 
     def init_gui(self) -> None:
         """Initialize the GUI elements."""
-        self.setWindowIcon(QIcon("src/assets/icon.png"))
+        # Set the window icon based on the system's color scheme
+        if self.palette().color(self.backgroundRole()).lightness() > 128:
+            self.setWindowIcon(QIcon("src/assets/dark/icon.png"))
+        else:
+            self.setWindowIcon(QIcon("src/assets/light/icon.png"))
 
         # Create the central widget layout
         central_widget = QWidget(self)
@@ -102,13 +110,48 @@ class MP3_Player(QMainWindow):
 
     def create_sliders(self, central_layout: QVBoxLayout) -> None:
         """Create the progress and volume sliders."""
+        # Create a layout for the progress slider and buttons
+        progress_layout = QVBoxLayout()
+
+        # Create a horizontal layout for the progress slider and buttons
+        slider_layout = QHBoxLayout()
+
+        # Rewind button
+        self.rewind_button = QPushButton(self)
+        self.rewind_button.setFixedWidth(50)  # Set a smaller width for the button
+        if self.palette().color(self.backgroundRole()).lightness() > 128:
+            self.rewind_button.setIcon(QIcon("src/assets/dark/rewind-t.png"))
+        else:
+            self.rewind_button.setIcon(QIcon("src/assets/light/rewind.png"))
+        self.rewind_button.clicked.connect(self.rewind_song)
+        slider_layout.addWidget(self.rewind_button)
+
         # Progress slider (for tracking and seeking audio progress)
         self.progress_slider = QSlider(Qt.Horizontal, self)
         self.progress_slider.setRange(0, 100)
         self.progress_slider.sliderPressed.connect(self.seek_audio)
         self.progress_slider.setDisabled(True)
-        central_layout.addWidget(QLabel("Progress"))
-        central_layout.addWidget(self.progress_slider)
+        slider_layout.addWidget(QLabel("Progress"))
+        slider_layout.addWidget(self.progress_slider)
+
+        # Skip button
+        self.skip_button = QPushButton(self)
+        self.skip_button.setFixedWidth(50)  # Set a smaller width for the button
+        if self.palette().color(self.backgroundRole()).lightness() > 128:
+            self.skip_button.setIcon(QIcon("src/assets/dark/skip.png"))
+        else:
+            self.skip_button.setIcon(QIcon("src/assets/light/skip.png"))
+        self.skip_button.clicked.connect(self.skip_song)
+        slider_layout.addWidget(self.skip_button)
+
+        # Add the slider layout to the progress layout
+        progress_layout.addLayout(slider_layout)
+
+        self.skip_button.clicked.connect(self.play_next)
+        progress_layout.addWidget(self.skip_button)
+
+        # Add the progress layout to the central layout
+        central_layout.addLayout(progress_layout)
 
         # Volume slider (bottom)
         self.volume_slider = QSlider(Qt.Horizontal, self)
@@ -155,6 +198,11 @@ class MP3_Player(QMainWindow):
         self.stop_button = QPushButton("Stop", self)
         self.stop_button.clicked.connect(self.stop_audio)
         dock_layout.addWidget(self.stop_button)
+
+        # loop button
+        self.loop_button = QPushButton("Loop", self)
+        self.loop_button.clicked.connect(self.loop_song) # TODO
+        dock_layout.addWidget(self.loop_button)
 
         # Save Playlist button
         self.save_playlist_button = QPushButton("Save Playlist", self)
@@ -296,6 +344,7 @@ class MP3_Player(QMainWindow):
         self.playlist_thread = PlaylistThread(self.media_files, self.shuffle)
 
         self.playlist_thread.is_paused.emit(False)
+        self.playlist_thread.is_looping.emit(self.is_looping)
         self.playlist_thread.song_changed.connect(self.update_current_song)
         self.playlist_thread.disable_progress_slider.connect(self.progress_slider.setDisabled)
         self.playlist_thread.finished.connect(self.on_playlist_finished)
@@ -310,11 +359,16 @@ class MP3_Player(QMainWindow):
         max_length = 50  # Define the maximum length for the song name
 
         if song:
+            self.previously_played.append(song)
             display_name = os.path.basename(song)
         elif self.current_music:
+            self.previously_played.append(self.current_music)
             display_name = os.path.basename(self.current_music)
         else:
             display_name = "None"
+
+        if len(self.previously_played) > self.max_previously_saved:
+            self.previously_played = self.previously_played[-self.max_previously_saved:]
 
         if len(display_name) > max_length:
             display_name = display_name[:max_length] + "..."
@@ -351,6 +405,43 @@ class MP3_Player(QMainWindow):
                 self.playlist_thread.is_paused.emit(False)
 
         self.play_button.setText("Pause")
+
+    def skip_song(self) -> None:
+        """Skip to the next song in the playlist."""
+        if self.shuffle:
+            self.current_index = (self.current_index + 1) % len(self.media_files)
+        else:
+            self.current_index = (self.current_index + 1) % len(self.media_files)
+        self.play_next()
+
+    def loop_song(self) -> None:
+        """Toggle looping of the current song."""
+        if not pygame.mixer.music.get_busy():
+            return
+
+        if pygame.mixer.music.get_endevent() == pygame.USEREVENT:
+            pygame.mixer.music.set_endevent()
+            self.is_looping = False
+            if self.playlist_thread:
+                self.playlist_thread.is_looping.emit(self.is_looping)
+
+            self.loop_button.setText("Loop")
+
+        else:
+            self.is_looping = True
+            pygame.mixer.music.set_endevent(pygame.USEREVENT)
+            if self.playlist_thread:
+                self.playlist_thread.is_looping.emit(self.is_looping)
+
+            self.loop_button.setText("Unloop")
+
+    def rewind_song(self) -> None:
+        """Rewind to the previous song in the playlist."""
+        if self.shuffle:
+            self.current_index = (self.current_index - 1) % len(self.media_files)
+        else:
+            self.current_index = (self.current_index - 1) % len(self.media_files)
+        self.play_next()
 
     def stop_audio(self) -> None:
         """Stop the current audio and reset the buttons."""
