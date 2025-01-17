@@ -52,9 +52,9 @@ class Saved_Playlists_handler:
             playlist_name (str): The name of the Playlist.
             song_path (str): The path of the song to remove.
         """
-        if not playlist_name in self.load_playlists().keys():
-            return
         playlist = self.load_playlists().get(playlist_name, [])
+        if not playlist: return
+
         playlist.remove(song_path)
         self.save_playlist(playlist_name, playlist)
 
@@ -85,4 +85,6 @@ class Saved_Playlists_handler:
 
 if __name__ == "__main__":
     loader = Saved_Playlists_handler()
-    print(loader.load_playlists())
+    playlists: dict[str, list[str]] = loader.load_playlists()
+    for name, playlist in zip(playlists.keys(), playlists.values()):
+        print(f"Playlist: {name} -- lenght: {len(playlist)}")

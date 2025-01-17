@@ -1,5 +1,6 @@
-import sys, os
+import os
 
+# Import GUI elements from PySide6
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout
 from PySide6.QtGui import QAction, QContextMenuEvent
 from PySide6.QtCore import Qt, QTimer
@@ -131,7 +132,6 @@ class MP3_Player(QMainWindow):
         self.progress_slider.setRange(0, 100)
         self.progress_slider.sliderPressed.connect(self.seek_audio)
         self.progress_slider.setDisabled(True)
-        slider_layout.addWidget(QLabel("Progress"))
         slider_layout.addWidget(self.progress_slider)
 
         # Skip button
@@ -265,15 +265,17 @@ class MP3_Player(QMainWindow):
 
     def remove_audio_from_playlist(self) -> None:
         """Remove the selected audio file from the playlist."""
+        # remove from programm and GUI
         index = self.playlist_list.row(self.playlist_list.currentItem())
         self.playlist_list.takeItem(index)
-        self.media_files.pop(index)
+        song_path = self.media_files.pop(index)
 
         # remove from saved playlist
-        if self.existing_playlists:
-            for playlist in self.existing_playlists.values():
-                if self.current_music in playlist:
-                    self.loader.remove_from_playlist(playlist, self.current_music)
+        if not self.existing_playlists:
+            return
+        for playlist, name in zip(self.existing_playlists.values(), self.existing_playlists.keys()):
+            if song_path in playlist:
+                self.loader.remove_from_playlist(name, self.current_music)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         """Create a context menu for the playlist."""
@@ -333,7 +335,7 @@ class MP3_Player(QMainWindow):
 
             if pygame.mixer.music.get_busy():
                 pygame.mixer.music.stop()
-                pygame.mixer.music.unload()
+            pygame.mixer.music.unload()
 
     def play_playlist(self) -> None:
         """Play the entire playlist."""
@@ -493,12 +495,14 @@ class MP3_Player(QMainWindow):
     def add_to_playlist(self) -> None:
         """Add the selected audio file to a playlist."""
         current_item = self.playlist_list.currentItem()
-        if current_item:
-            playlist_name, ok = QInputDialog.getText(self, "Enter Playlist Name", "Please enter the name of the Playlist:")
-            if ok and playlist_name:
-                self.loader.add_to_playlist(playlist_name, self.media_files[self.playlist_list.row(current_item)])
-                self.load_existing_playlists()
-                self.reload_dock_widget()
+        if not current_item:
+            return
+        playlist_name, ok = QInputDialog.getText(self, "Enter Playlist Name", "Please enter the name of the Playlist:")
+        if not ok or not playlist_name:
+            return
+        self.loader.add_to_playlist(playlist_name, self.media_files[self.playlist_list.row(current_item)])
+        self.load_existing_playlists()
+        self.reload_dock_widget()
 
     def load_single_files(self, clear: bool = False) -> None:
         """Load single audio files."""
@@ -559,6 +563,7 @@ class MP3_Player(QMainWindow):
 
 
 if __name__ == "__main__":
+    import sys
     from PySide6.QtWidgets import QApplication
     app: QApplication = QApplication(sys.argv)
     player: MP3_Player = MP3_Player(os.path.join(os.environ['USERPROFILE'], 'Music'))

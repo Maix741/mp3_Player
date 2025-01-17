@@ -59,7 +59,7 @@ class PlaylistThread(QThread):
             self.song_changed.emit(media_file)
 
             # Wait until the song is finished
-            while (pygame.mixer.music.get_busy() and self.is_alive) or (self._is_paused and self.is_alive) or (self._is_looping and self.is_alive):
+            while (pygame.mixer.music.get_busy() or self._is_paused or self._is_looping) and self.is_alive:
                 if not self._is_paused and not pygame.mixer.music.get_busy():
                     if self.is_looping:
                         pygame.mixer.music.play()
