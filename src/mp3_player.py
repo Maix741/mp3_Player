@@ -61,7 +61,7 @@ class MP3_Player(QMainWindow):
         self.previously_played: list[str] = [] # FIXME: currently useless
         self.is_looping: bool = False
 
-        self.loader = Saved_Playlists_handler()
+        self.loader: Saved_Playlists_handler = Saved_Playlists_handler()
         self.playlist_thread: PlaylistThread | None = None
 
         if load_saved:
