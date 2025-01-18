@@ -1,9 +1,10 @@
 import os
+from PySide6.QtCore import QTranslator, QLocale, QCoreApplication
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
     QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, 
-    QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout
+    QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout,
 )
 from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
 from PySide6.QtCore import Qt, QTimer
@@ -31,7 +32,14 @@ class MP3_Player(QMainWindow):
         """
         super().__init__(parent)
 
-        self.setWindowTitle("MP3 Player")
+        # Load translations
+        self.translator = QTranslator()
+        locale = QLocale.system().name()
+        translation_file = os.path.join(os.path.dirname(sys.argv[0]), f"locales/{locale}.qm")
+        if self.translator.load(translation_file):
+            QCoreApplication.installTranslator(self.translator)
+
+        self.setWindowTitle(self.tr("MP3 Player"))
         self.setGeometry(100, 100, 1000, 600)
         self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
 
@@ -68,7 +76,7 @@ class MP3_Player(QMainWindow):
 
 
     def init_gui(self) -> None:
-        """Initialize the GUI elements."""
+        """Initialize the GUI elements."""        
         # Set the window icon based on the system's color scheme
         if self.light_mode:
             self.setWindowIcon(QIcon("src/assets/dark/icon.png"))
@@ -82,7 +90,7 @@ class MP3_Player(QMainWindow):
         # Create a main layout for the central widget
         central_layout = QVBoxLayout(central_widget)
 
-        self.current_song = QLabel(f"Song: {self.current_music}", self)
+        self.current_song = QLabel(self.tr(f"Song: {self.current_music}"), self)
 
         # Set the font size using QFont
         font = self.current_song.font()
@@ -114,7 +122,7 @@ class MP3_Player(QMainWindow):
         self.create_menubar()
 
     def create_sliders(self, central_layout: QVBoxLayout) -> None:
-        """Create the progress and volume sliders."""
+        """Create the progress and volume sliders."""        
         # Create a layout for the progress slider and buttons
         progress_layout = QVBoxLayout()
 
@@ -125,7 +133,7 @@ class MP3_Player(QMainWindow):
         self.rewind_button = QPushButton(self)
         self.rewind_button.setFixedWidth(40)  # Set a smaller width for the button
         if self.light_mode:
-            self.rewind_button.setIcon(QIcon("src/assets/dark/rewind-t.png"))
+            self.rewind_button.setIcon(QIcon("src/assets/dark/rewind.png"))
         else:
             self.rewind_button.setIcon(QIcon("src/assets/light/rewind.png"))
         self.rewind_button.clicked.connect(self.rewind_song)
@@ -162,11 +170,11 @@ class MP3_Player(QMainWindow):
         self.volume_slider.setRange(0, 100)
         self.volume_slider.setValue(50)
         self.volume_slider.valueChanged.connect(self.set_volume)
-        central_layout.addWidget(QLabel("Volume"))
+        central_layout.addWidget(QLabel(self.tr("Volume")))
         central_layout.addWidget(self.volume_slider)
 
     def create_controls_dock(self) -> None:
-        """Create the dock widget with control buttons."""
+        """Create the dock widget with control buttons."""        
         """Recreate the entire dock widget with updated content."""
         # Remove the previous dock widget if it exists
         if hasattr(self, 'dock_widget'):
@@ -174,7 +182,7 @@ class MP3_Player(QMainWindow):
             del self.dock_widget
 
         # Create a new dock widget
-        self.dock_widget = QDockWidget("Controls", self)
+        self.dock_widget = QDockWidget(self.tr("Controls"), self)
         self.dock_widget.setFeatures(QDockWidget.DockWidgetMovable)
         self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
@@ -190,31 +198,31 @@ class MP3_Player(QMainWindow):
             dock_layout.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # Play / Pause button
-        self.play_button = QPushButton("Play", self)
+        self.play_button = QPushButton(self.tr("Play"), self)
         self.play_button.clicked.connect(self.toggle_play_pause)
         dock_layout.addWidget(self.play_button)
 
-        self.play_playlist_button = QPushButton("Play Playlist", self)
+        self.play_playlist_button = QPushButton(self.tr("Play Playlist"), self)
         self.play_playlist_button.clicked.connect(self.play_playlist)
         dock_layout.addWidget(self.play_playlist_button)
 
         # Stop button
-        self.stop_button = QPushButton("Stop", self)
+        self.stop_button = QPushButton(self.tr("Stop"), self)
         self.stop_button.clicked.connect(self.stop_audio)
         dock_layout.addWidget(self.stop_button)
 
         # loop button
-        self.loop_button = QPushButton("Loop", self)
+        self.loop_button = QPushButton(self.tr("Loop"), self)
         self.loop_button.clicked.connect(self.loop_song) # TODO
         dock_layout.addWidget(self.loop_button)
 
         # Save Playlist button
-        self.save_playlist_button = QPushButton("Save Playlist", self)
+        self.save_playlist_button = QPushButton(self.tr("Save Playlist"), self)
         self.save_playlist_button.clicked.connect(self.save_playlist)
         dock_layout.addWidget(self.save_playlist_button)
 
         # Playlist button
-        self.playlist_button = QPushButton("Add from Folder", self)
+        self.playlist_button = QPushButton(self.tr("Add from Folder"), self)
         self.playlist_button.clicked.connect(lambda: self.load_playlist_folder(False))
         dock_layout.addWidget(self.playlist_button)
 
@@ -222,7 +230,7 @@ class MP3_Player(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_widget)
 
     def create_saved_playlists_button(self, dock_layout: QVBoxLayout) -> None:
-        """Create buttons for each saved playlist."""
+        """Create buttons for each saved playlist."""        
         # Create a QScrollArea to make the list scrollable (only once)
         button_container = QWidget()
         button_layout = QVBoxLayout(button_container)
@@ -247,10 +255,10 @@ class MP3_Player(QMainWindow):
         button_layout.addSpacerItem(spacer)
 
     def show_playlist_context_menu(self, playlist_name: str, playlist_button: QPushButton, position) -> None:
-        """Show context menu for the saved playlists."""
+        """Show context menu for the saved playlists."""        
         context_menu = QMenu(self)
 
-        delete_action = QAction("Delete", self)
+        delete_action = QAction(self.tr("Delete"), self)
         delete_action.triggered.connect(partial(self.delete_playlist, playlist_name))
 
         context_menu.addAction(delete_action)
@@ -258,17 +266,17 @@ class MP3_Player(QMainWindow):
         context_menu.exec(global_position)
 
     def delete_playlist(self, playlist_name: str) -> None:
-        """Delete the selected playlist."""
+        """Delete the selected playlist."""        
         self.loader.delete_playlist(playlist_name)
         self.load_existing_playlists()
         self.reload_dock_widget()
 
     def reload_dock_widget(self) -> None:
-        """Reload the entire dock widget to reflect changes in existing playlists."""
+        """Reload the entire dock widget to reflect changes in existing playlists."""        
         self.create_controls_dock()
 
     def remove_audio_from_playlist(self) -> None:
-        """Remove the selected audio file from the playlist."""
+        """Remove the selected audio file from the playlist."""        
         # remove from programm and GUI
         index = self.playlist_list.row(self.playlist_list.currentItem())
         self.playlist_list.takeItem(index)
@@ -282,16 +290,16 @@ class MP3_Player(QMainWindow):
                 self.loader.remove_from_playlist(name, self.current_music)
 
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
-        """Create a context menu for the playlist."""
+        """Create a context menu for the playlist."""        
         # Check if the event position is within the playlist area
         if self.playlist_list.geometry().contains(event.pos()):
             # Create the context menu
             context_menu = QMenu(self)
 
             # Add actions to the context menu
-            action_play = QAction("Play", self)
-            action_remove = QAction("Remove", self)
-            action_add_to_playlist = QAction("Add to playlist", self)
+            action_play = QAction(self.tr("Play"), self)
+            action_remove = QAction(self.tr("Remove"), self)
+            action_add_to_playlist = QAction(self.tr("Add to playlist"), self)
 
             # Connect actions to slots (optional)
             action_play.triggered.connect(self.play_selected)
@@ -307,29 +315,29 @@ class MP3_Player(QMainWindow):
             context_menu.exec(event.globalPos())
 
     def create_menubar(self) -> None:
-        """Create the menu bar with file actions."""
+        """Create the menu bar with file actions."""        
         # Create the menu bar
         menubar = self.menuBar()
 
         # Create "File" menu
-        file_menu = QMenu("File", self)
+        file_menu = QMenu(self.tr("File"), self)
         menubar.addMenu(file_menu)
 
         # Add actions to the "File" menu
-        open_action = QAction("Open", self)
+        open_action = QAction(self.tr("Open"), self)
         open_action.triggered.connect(self.load_single_files)
         file_menu.addAction(open_action)
 
-        exit_action = QAction("Exit", self)
+        exit_action = QAction(self.tr("Exit"), self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
-        clear_action = QAction("Clear", self)
+        clear_action = QAction(self.tr("Clear"), self)
         clear_action.triggered.connect(self.clear_playlist)
         file_menu.addAction(clear_action)
 
     def clear_playlist(self) -> None:
-            """Clear the playlist and stop the current audio."""
+            """Clear the playlist and stop the current audio."""            
             self.playlist_list.clear()  # Clear the playlist display
             self.media_files.clear()  # Clear the playlist
 
@@ -342,8 +350,8 @@ class MP3_Player(QMainWindow):
             pygame.mixer.music.unload()
 
     def play_playlist(self) -> None:
-        """Play the entire playlist."""
-        if self.play_playlist_button.text() == "Stop Playlist":
+        """Play the entire playlist."""        
+        if self.play_playlist_button.text() == self.tr("Stop Playlist"):
             self.on_playlist_finished()
 
         # Create and start the playlist thread
@@ -355,13 +363,13 @@ class MP3_Player(QMainWindow):
         self.playlist_thread.disable_progress_slider.connect(self.progress_slider.setDisabled)
         self.playlist_thread.finished.connect(self.on_playlist_finished)
 
-        self.play_playlist_button.setText("Stop Playlist")
-        self.play_button.setText("Pause")
+        self.play_playlist_button.setText(self.tr("Stop Playlist"))
+        self.play_button.setText(self.tr("Pause"))
 
         self.playlist_thread.start()
 
     def update_current_song(self, song: str | None = None) -> None:
-        """Update the current song label with the provided song name."""
+        """Update the current song label with the provided song name."""        
         max_length = 50  # Define the maximum length for the song name
 
         if song:
@@ -371,7 +379,7 @@ class MP3_Player(QMainWindow):
             self.previously_played.append(self.current_music)
             display_name = os.path.basename(self.current_music)
         else:
-            display_name = "None"
+            display_name = self.tr("None")
 
         if len(self.previously_played) > self.max_previously_saved:
             self.previously_played = self.previously_played[-self.max_previously_saved:]
@@ -379,27 +387,27 @@ class MP3_Player(QMainWindow):
         if len(display_name) > max_length:
             display_name = display_name[:max_length] + "..."
 
-        self.current_song.setText(f"Song: {display_name}")
+        self.current_song.setText(self.tr(f"Song: {display_name}"))
 
     def on_playlist_finished(self) -> None:
-        """Stop the playlist and reset the buttons."""
+        """Stop the playlist and reset the buttons."""        
         self.playlist_thread.stop()
 
-        self.play_playlist_button.setText("Play Playlist")
-        self.play_button.setText("Play")
+        self.play_playlist_button.setText(self.tr("Play Playlist"))
+        self.play_button.setText(self.tr("Play"))
 
         self.progress_slider.setDisabled(True)
         self.progress_slider.setDisabled(True)
 
     def toggle_play_pause(self) -> None:
-        """Toggle between play and pause states."""
+        """Toggle between play and pause states."""        
         if pygame.mixer.music.get_busy():
             if self.playlist_thread:
                 self.playlist_thread.is_paused.emit(True)
 
             pygame.mixer.music.pause()
             is_paused: bool = True
-            self.play_button.setText("Play")
+            self.play_button.setText(self.tr("Play"))
             return
 
         else:
@@ -408,13 +416,13 @@ class MP3_Player(QMainWindow):
             if self.playlist_thread:
                 self.playlist_thread.is_paused.emit(False)
             is_paused: bool = False
-            self.play_button.setText("Pause")
+            self.play_button.setText(self.tr("Pause"))
 
         if not self.playlist_thread and not pygame.mixer.music.get_busy() and not is_paused:  # If no track is playing, play the first one
             self.play_next()
 
     def skip_song(self) -> None:
-        """Skip to the next song in the playlist."""
+        """Skip to the next song in the playlist."""        
         if self.shuffle:
             self.current_index = (self.current_index + 1) % len(self.media_files)
         else:
@@ -422,7 +430,7 @@ class MP3_Player(QMainWindow):
         self.play_next()
 
     def loop_song(self) -> None:
-        """Toggle looping of the current song."""
+        """Toggle looping of the current song."""        
         if not pygame.mixer.music.get_busy():
             return
 
@@ -432,7 +440,7 @@ class MP3_Player(QMainWindow):
             if self.playlist_thread:
                 self.playlist_thread.is_looping.emit(self.is_looping)
 
-            self.loop_button.setText("Loop")
+            self.loop_button.setText(self.tr("Loop"))
 
         else:
             self.is_looping = True
@@ -440,10 +448,10 @@ class MP3_Player(QMainWindow):
             if self.playlist_thread:
                 self.playlist_thread.is_looping.emit(self.is_looping)
 
-            self.loop_button.setText("Unloop")
+            self.loop_button.setText(self.tr("Unloop"))
 
     def rewind_song(self) -> None:
-        """Rewind to the previous song in the playlist."""
+        """Rewind to the previous song in the playlist."""        
         if self.shuffle:
             self.current_index = (self.current_index - 1) % len(self.media_files)
         else:
@@ -451,21 +459,21 @@ class MP3_Player(QMainWindow):
         self.play_next()
 
     def stop_audio(self) -> None:
-        """Stop the current audio and reset the buttons."""
+        """Stop the current audio and reset the buttons."""        
         self.progress_slider.setDisabled(True)
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
         if not self.playlist_thread: # If a playlist is playing, don't reset the play button
-            self.play_button.setText("Play")
+            self.play_button.setText(self.tr("Play"))
             self.progress_slider.setValue(0)
 
     def set_volume(self, value: float) -> None:
-        """Set the volume of the audio."""
+        """Set the volume of the audio."""        
         pygame.mixer.music.set_volume(value / 100)
 
     def load_playlist_folder(self, clear: bool = True) -> None:
-        """Load all audio files from a selected folder."""
-        directory = QFileDialog.getExistingDirectory(self, "Choose Playlist", self.initial_directory)
+        """Load all audio files from a selected folder."""        
+        directory = QFileDialog.getExistingDirectory(self, self.tr("Choose Playlist"), self.initial_directory)
 
         if not directory: return
 
@@ -477,19 +485,19 @@ class MP3_Player(QMainWindow):
         self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
 
     def load_playlist(self, name: str) -> None:
-        """Load an existing playlist."""
+        """Load an existing playlist."""        
         self.playlist_list.clear()
         self.playlist_list.addItems([os.path.basename(file) for file in self.existing_playlists[name]]) # Display the Songnames in the playlist in the widget
         self.media_files = self.existing_playlists[name]
 
     def load_existing_playlists(self) -> None:
-        """Load the existing playlists."""
+        """Load the existing playlists."""        
         self.existing_playlists: dict[str, str] = self.loader.load_playlists()
 
     def save_playlist(self) -> None:
-        """Save the current playlist."""
+        """Save the current playlist."""        
         # Create a dialog that asks the user for their name
-        playlist_name, ok = QInputDialog.getText(self, "Enter Name", "Please enter the name of the Playlist:")
+        playlist_name, ok = QInputDialog.getText(self, self.tr("Enter Name"), self.tr("Please enter the name of the Playlist:"))
 
         if ok and playlist_name:
             # Show the name in a message box if it's provided
@@ -499,11 +507,11 @@ class MP3_Player(QMainWindow):
         self.reload_dock_widget()
 
     def add_to_playlist(self) -> None:
-        """Add the selected audio file to a playlist."""
+        """Add the selected audio file to a playlist."""        
         current_item = self.playlist_list.currentItem()
         if not current_item:
             return
-        playlist_name, ok = QInputDialog.getText(self, "Enter Playlist Name", "Please enter the name of the Playlist:")
+        playlist_name, ok = QInputDialog.getText(self, self.tr("Enter Playlist Name"), self.tr("Please enter the name of the Playlist:"))
         if not ok or not playlist_name:
             return
         self.loader.add_to_playlist(playlist_name, self.media_files[self.playlist_list.row(current_item)])
@@ -511,9 +519,9 @@ class MP3_Player(QMainWindow):
         self.reload_dock_widget()
 
     def load_single_files(self, clear: bool = False) -> None:
-        """Load single audio files."""
+        """Load single audio files."""        
         # Open file dialog to select MP3 files
-        files, _ = QFileDialog.getOpenFileNames(self, "Select MP3 Files", "", "audio (*.mp3 *.wav );;All Files (*)")
+        files, _ = QFileDialog.getOpenFileNames(self, self.tr("Select MP3 Files"), "", self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)"))
 
         if not files: return
 
@@ -525,7 +533,7 @@ class MP3_Player(QMainWindow):
         self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
 
     def play_selected(self) -> None:
-        """Play the selected item in the playlist."""
+        """Play the selected item in the playlist."""        
         # Play the selected item in the playlist
         current_item = self.playlist_list.currentItem()
         if current_item:
@@ -533,12 +541,12 @@ class MP3_Player(QMainWindow):
             self.play_next()
 
     def play_next(self, media_file: str | None = None) -> None:
-        """Play the next song in the playlist."""
+        """Play the next song in the playlist."""        
         # Check if there are any files in the playlist
         if not self.media_files:
             return
 
-        self.play_button.setText("Pause")
+        self.play_button.setText(self.tr("Pause"))
         self.progress_slider.setDisabled(False)
         if not media_file:
             self.current_music = self.media_files[self.current_index]
@@ -553,7 +561,7 @@ class MP3_Player(QMainWindow):
         self.progress_slider.setRange(0, int(self.music_length))
 
     def update_progress(self) -> None:
-        """Update the progress slider."""
+        """Update the progress slider."""        
         if not pygame.mixer.music.get_busy():
             self.progress_slider.setDisabled(True)
             return
@@ -564,7 +572,7 @@ class MP3_Player(QMainWindow):
         self.progress_slider.blockSignals(False)
 
     def seek_audio(self) -> None:
-        """set the audio to the selected position"""
+        """set the audio to the selected position"""        
         # When the user clicks on the slider, move the audio to the selected position
         seek_position: float = self.progress_slider.value()
         self.start_value = seek_position
