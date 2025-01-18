@@ -548,12 +548,13 @@ class MP3_Player(QMainWindow):
 
     def update_progress(self) -> None: # FIXME: slider not updating
         """Update the progress slider."""
-        if pygame.mixer.music.get_busy():
-            # Get current position of the audio file and update the slider
-            current_position = pygame.mixer.music.get_pos() / 1000  # Convert to seconds
-            self.progress_slider.blockSignals(True)  # Prevent triggering seek_audio while updating
-            self.progress_slider.setValue(int(current_position))
-            self.progress_slider.blockSignals(False)
+        if not pygame.mixer.music.get_busy():
+            return
+        # Get current position of the audio file and update the slider
+        current_position = pygame.mixer.music.get_pos() / 1000  # Convert to seconds
+        self.progress_slider.blockSignals(True)  # Prevent triggering seek_audio while updating
+        self.progress_slider.setValue(int(current_position))
+        self.progress_slider.blockSignals(False)
 
     def seek_audio(self) -> None:
         """set the audio to the selected position"""
