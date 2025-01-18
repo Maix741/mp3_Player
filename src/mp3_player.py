@@ -34,6 +34,7 @@ class MP3_Player(QMainWindow):
 
         # Initialize Pygame mixer
         pygame.mixer.init()
+        self.start_value: int = 0
 
         # Initialize variables
         self.media_files: list[str] = [] # List to keep track of loaded media files
@@ -394,19 +395,20 @@ class MP3_Player(QMainWindow):
                 self.playlist_thread.is_paused.emit(True)
 
             pygame.mixer.music.pause()
+            is_paused: bool = True
             self.play_button.setText("Play")
             return
-
-        if self.current_index == 0 and not self.playlist_thread:  # If no track is selected, play the first one
-            self.play_next()
 
         else:
             self.progress_slider.setDisabled(False)
             pygame.mixer.music.unpause()
             if self.playlist_thread:
                 self.playlist_thread.is_paused.emit(False)
+            is_paused: bool = False
+            self.play_button.setText("Pause")
 
-        self.play_button.setText("Pause")
+        if not self.playlist_thread and not pygame.mixer.music.get_busy() and not is_paused:  # If no track is playing, play the first one
+            self.play_next()
 
     def skip_song(self) -> None:
         """Skip to the next song in the playlist."""
@@ -546,20 +548,22 @@ class MP3_Player(QMainWindow):
         self.music_length = pygame.mixer.Sound(self.current_music).get_length()
         self.progress_slider.setRange(0, int(self.music_length))
 
-    def update_progress(self) -> None: # FIXME: slider not updating
+    def update_progress(self) -> None:
         """Update the progress slider."""
         if not pygame.mixer.music.get_busy():
+            self.progress_slider.setDisabled(True)
             return
         # Get current position of the audio file and update the slider
         current_position = pygame.mixer.music.get_pos() / 1000  # Convert to seconds
         self.progress_slider.blockSignals(True)  # Prevent triggering seek_audio while updating
-        self.progress_slider.setValue(int(current_position))
+        self.progress_slider.setValue(int(self.start_value + current_position))
         self.progress_slider.blockSignals(False)
 
     def seek_audio(self) -> None:
         """set the audio to the selected position"""
         # When the user clicks on the slider, move the audio to the selected position
         seek_position: float = self.progress_slider.value()
+        self.start_value = seek_position
         pygame.mixer.music.set_pos(seek_position)
 
 
