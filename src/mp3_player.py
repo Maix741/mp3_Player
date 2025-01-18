@@ -2,9 +2,8 @@ import os
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout
-from PySide6.QtGui import QAction, QContextMenuEvent
+from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QIcon
 from functools import partial
 import pygame
 
@@ -120,7 +119,7 @@ class MP3_Player(QMainWindow):
 
         # Rewind button
         self.rewind_button = QPushButton(self)
-        self.rewind_button.setFixedWidth(50)  # Set a smaller width for the button
+        self.rewind_button.setFixedWidth(40)  # Set a smaller width for the button
         if self.palette().color(self.backgroundRole()).lightness() > 128:
             self.rewind_button.setIcon(QIcon("src/assets/dark/rewind-t.png"))
         else:
@@ -137,7 +136,7 @@ class MP3_Player(QMainWindow):
 
         # Skip button
         self.skip_button = QPushButton(self)
-        self.skip_button.setFixedWidth(50)  # Set a smaller width for the button
+        self.skip_button.setFixedWidth(40)  # Set a smaller width for the button
         if self.palette().color(self.backgroundRole()).lightness() > 128:
             self.skip_button.setIcon(QIcon("src/assets/dark/skip.png"))
         else:
