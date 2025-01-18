@@ -73,10 +73,10 @@ class PlaylistThread(QThread):
     def terminate(self):
         """Terminate the Playlist Thread."""
         self.is_alive = False
+        self.msleep(100)
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
         self.song_changed.emit(None)
-        self.msleep(100)
         return super().terminate()
 
     def stop(self):

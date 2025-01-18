@@ -1,7 +1,10 @@
 import os
 
 # Import GUI elements from PySide6
-from PySide6.QtWidgets import QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout
+from PySide6.QtWidgets import (
+    QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, 
+    QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout
+)
 from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
 from PySide6.QtCore import Qt, QTimer
 from functools import partial
@@ -30,6 +33,7 @@ class MP3_Player(QMainWindow):
 
         self.setWindowTitle("MP3 Player")
         self.setGeometry(100, 100, 1000, 600)
+        self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
 
         # Initialize Pygame mixer
         pygame.mixer.init()
@@ -66,7 +70,7 @@ class MP3_Player(QMainWindow):
     def init_gui(self) -> None:
         """Initialize the GUI elements."""
         # Set the window icon based on the system's color scheme
-        if self.palette().color(self.backgroundRole()).lightness() > 128:
+        if self.light_mode:
             self.setWindowIcon(QIcon("src/assets/dark/icon.png"))
         else:
             self.setWindowIcon(QIcon("src/assets/light/icon.png"))
@@ -120,7 +124,7 @@ class MP3_Player(QMainWindow):
         # Rewind button
         self.rewind_button = QPushButton(self)
         self.rewind_button.setFixedWidth(40)  # Set a smaller width for the button
-        if self.palette().color(self.backgroundRole()).lightness() > 128:
+        if self.light_mode:
             self.rewind_button.setIcon(QIcon("src/assets/dark/rewind-t.png"))
         else:
             self.rewind_button.setIcon(QIcon("src/assets/light/rewind.png"))
@@ -137,7 +141,7 @@ class MP3_Player(QMainWindow):
         # Skip button
         self.skip_button = QPushButton(self)
         self.skip_button.setFixedWidth(40)  # Set a smaller width for the button
-        if self.palette().color(self.backgroundRole()).lightness() > 128:
+        if self.light_mode:
             self.skip_button.setIcon(QIcon("src/assets/dark/skip.png"))
         else:
             self.skip_button.setIcon(QIcon("src/assets/light/skip.png"))
@@ -453,6 +457,7 @@ class MP3_Player(QMainWindow):
         pygame.mixer.music.unload()
         if not self.playlist_thread: # If a playlist is playing, don't reset the play button
             self.play_button.setText("Play")
+            self.progress_slider.setValue(0)
 
     def set_volume(self, value: float) -> None:
         """Set the volume of the audio."""
