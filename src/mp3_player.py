@@ -1,11 +1,11 @@
-import os
-from PySide6.QtCore import QTranslator, QLocale, QCoreApplication
+import os, sys
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
     QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, 
     QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout,
 )
+from PySide6.QtCore import QTranslator, QLocale, QCoreApplication
 from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
 from PySide6.QtCore import Qt, QTimer
 from functools import partial
@@ -22,7 +22,9 @@ else:
 
 class MP3_Player(QMainWindow):
     """A simple MP3 player application using Pygame and PySide6."""
-    def __init__(self, initial_directory: str | None = None, load_saved: bool = True, shuffle: bool = False, parent = None) -> None:
+    def __init__(self,
+                 initial_directory: str | None = None, load_saved: bool = True, shuffle: bool = False,
+                 parent: QWidget | None = None) -> None:
         """Initialize the MP3 Player.
 
         Args:
@@ -35,7 +37,7 @@ class MP3_Player(QMainWindow):
         # Load translations
         self.translator = QTranslator()
         locale = QLocale.system().name()
-        translation_file = os.path.join(os.path.dirname(sys.argv[0]), f"locales/{locale}.qm")
+        translation_file: str = os.path.join(os.path.dirname(sys.argv[0]), "locales", f"{locale}.qm")
         if self.translator.load(translation_file):
             QCoreApplication.installTranslator(self.translator)
 
@@ -48,15 +50,15 @@ class MP3_Player(QMainWindow):
         self.start_value: int = 0
 
         # Initialize variables
-        self.media_files: list[str] = [] # List to keep track of loaded media files
-        self.current_index: int = 0
-        self.current_music: str | None = None
-        self.music_length: int = 0
         self.audio_file_types: tuple[str] = (".mp3", ".wav", ".ogg", ".flac")
+        self.media_files: list[str] = [] # List to keep track of loaded media files
+        self.current_music: str | None = None
+        self.current_index: int = 0
+        self.music_length: int = 0
         self.initial_directory: str | None = initial_directory
         self.shuffle: bool = shuffle
         self.max_previously_saved: int = 10
-        self.previously_played: list[str] = []
+        self.previously_played: list[str] = [] # FIXME: currently useless
         self.is_looping: bool = False
 
         self.loader = Saved_Playlists_handler()
@@ -64,7 +66,7 @@ class MP3_Player(QMainWindow):
 
         if load_saved:
             self.load_existing_playlists()
-        else: self.existing_playlists = None
+        else: self.existing_playlists = {}
 
         # Create UI elements
         self.init_gui()
@@ -79,9 +81,9 @@ class MP3_Player(QMainWindow):
         """Initialize the GUI elements."""        
         # Set the window icon based on the system's color scheme
         if self.light_mode:
-            self.setWindowIcon(QIcon("src/assets/dark/icon.png"))
+            self.setWindowIcon(QIcon("src\\assets\\dark\\icon.png"))
         else:
-            self.setWindowIcon(QIcon("src/assets/light/icon.png"))
+            self.setWindowIcon(QIcon("src\\assets\\light\\icon.png"))
 
         # Create the central widget layout
         central_widget = QWidget(self)
@@ -133,9 +135,9 @@ class MP3_Player(QMainWindow):
         self.rewind_button = QPushButton(self)
         self.rewind_button.setFixedWidth(40)  # Set a smaller width for the button
         if self.light_mode:
-            self.rewind_button.setIcon(QIcon("src/assets/dark/rewind.png"))
+            self.rewind_button.setIcon(QIcon("src\\assets\\dark\\rewind.png"))
         else:
-            self.rewind_button.setIcon(QIcon("src/assets/light/rewind.png"))
+            self.rewind_button.setIcon(QIcon("src\\assets\\light\\rewind.png"))
         self.rewind_button.clicked.connect(self.rewind_song)
         slider_layout.addWidget(self.rewind_button)
 
@@ -150,9 +152,9 @@ class MP3_Player(QMainWindow):
         self.skip_button = QPushButton(self)
         self.skip_button.setFixedWidth(40)  # Set a smaller width for the button
         if self.light_mode:
-            self.skip_button.setIcon(QIcon("src/assets/dark/skip.png"))
+            self.skip_button.setIcon(QIcon("src\\assets\\dark\\skip.png"))
         else:
-            self.skip_button.setIcon(QIcon("src/assets/light/skip.png"))
+            self.skip_button.setIcon(QIcon("src\\assets\\light\\skip.png"))
         self.skip_button.clicked.connect(self.skip_song)
         slider_layout.addWidget(self.skip_button)
 
@@ -492,7 +494,7 @@ class MP3_Player(QMainWindow):
 
     def load_existing_playlists(self) -> None:
         """Load the existing playlists."""        
-        self.existing_playlists: dict[str, str] = self.loader.load_playlists()
+        self.existing_playlists: dict[str, list[str]] = self.loader.load_playlists()
 
     def save_playlist(self) -> None:
         """Save the current playlist."""        
@@ -574,9 +576,8 @@ class MP3_Player(QMainWindow):
     def seek_audio(self) -> None:
         """set the audio to the selected position"""        
         # When the user clicks on the slider, move the audio to the selected position
-        seek_position: float = self.progress_slider.value()
-        self.start_value = seek_position
-        pygame.mixer.music.set_pos(seek_position)
+        self.start_value: float = self.progress_slider.value()
+        pygame.mixer.music.set_pos(self.start_value)
 
 
 if __name__ == "__main__":
