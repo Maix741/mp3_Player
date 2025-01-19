@@ -277,7 +277,8 @@ class Mp3Player(QMainWindow):
         self.create_controls_dock()
 
     def remove_audio_from_playlist(self) -> None:
-        """Remove the selected audio file from the playlist."""        
+        """Remove the selected audio file from the playlist."""
+        if not self.media_files: return
         # remove from programm and GUI
         index = self.playlist_list.row(self.playlist_list.currentItem())
         self.playlist_list.takeItem(index)
