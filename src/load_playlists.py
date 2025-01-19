@@ -2,7 +2,7 @@ import json
 import os
 
 
-class Saved_Playlists_handler:
+class SavedPlaylistsHandler:
     """Class to handle the saved Playlists."""
     def __init__(self) -> None:
         """Initialize the saved Playlists handler."""
@@ -23,7 +23,7 @@ class Saved_Playlists_handler:
 
         names: list[str] = os.listdir(self.playlists_path)
         file_paths: list[str] = [os.path.join(self.playlists_path, name) for name in names]
-        playlists: dict[str, str] = {}
+        playlists: dict[str, list[str]] = {}
 
         for file_path, name in zip(file_paths, names):
             with open(file_path, "r") as file:
@@ -52,7 +52,7 @@ class Saved_Playlists_handler:
             playlist_name (str): The name of the Playlist.
             song_path (str): The path of the song to remove.
         """
-        playlist = self.load_playlists().get(playlist_name, [])
+        playlist: list[str] = self.load_playlists().get(playlist_name, [])
         if not playlist: return
 
         playlist.remove(song_path)
@@ -84,7 +84,7 @@ class Saved_Playlists_handler:
 
 
 if __name__ == "__main__":
-    loader = Saved_Playlists_handler()
+    loader: SavedPlaylistsHandler = SavedPlaylistsHandler()
     playlists: dict[str, list[str]] = loader.load_playlists()
     for name, playlist in zip(playlists.keys(), playlists.values()):
         print(f"Playlist: {name} -- lenght: {len(playlist)}")

@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, 
     QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout,
 )
-from PySide6.QtCore import QTranslator, QLocale, QCoreApplication
+from PySide6.QtCore import QTranslator, QCoreApplication
 from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
 from PySide6.QtCore import Qt, QTimer
 from functools import partial
@@ -13,17 +13,17 @@ import pygame
 
 if __name__ == "__main__":
     from play_playlist import PlaylistThread
-    from load_playlists import Saved_Playlists_handler
+    from load_playlists import SavedPlaylistsHandler
 
 else:
     from .play_playlist import PlaylistThread
-    from .load_playlists import Saved_Playlists_handler
+    from .load_playlists import SavedPlaylistsHandler
 
 
-class MP3_Player(QMainWindow):
+class Mp3Player(QMainWindow):
     """A simple MP3 player application using Pygame and PySide6."""
     def __init__(self,
-                 initial_directory: str | None = None, load_saved: bool = True, shuffle: bool = False,
+                 initial_directory: str | None = None, load_saved: bool = True, shuffle: bool = False, locale: str = "en_US",
                  parent: QWidget | None = None) -> None:
         """Initialize the MP3 Player.
 
@@ -35,9 +35,8 @@ class MP3_Player(QMainWindow):
         super().__init__(parent)
 
         # Load translations
-        self.translator = QTranslator()
-        locale = QLocale.system().name()
-        translation_file: str = os.path.join(os.path.dirname(sys.argv[0]), "locales", f"{locale}.qm")
+        self.translator: QTranslator = QTranslator()
+        translation_file: str = os.path.join(os.path.dirname(sys.argv[0]), "src", "locales", f"{locale}.qm")
         if self.translator.load(translation_file):
             QCoreApplication.installTranslator(self.translator)
 
@@ -61,7 +60,7 @@ class MP3_Player(QMainWindow):
         self.previously_played: list[str] = [] # FIXME: currently useless
         self.is_looping: bool = False
 
-        self.loader: Saved_Playlists_handler = Saved_Playlists_handler()
+        self.loader: SavedPlaylistsHandler = SavedPlaylistsHandler()
         self.playlist_thread: PlaylistThread | None = None
 
         if load_saved:
@@ -523,7 +522,7 @@ class MP3_Player(QMainWindow):
     def load_single_files(self, clear: bool = False) -> None:
         """Load single audio files."""        
         # Open file dialog to select MP3 files
-        files, _ = QFileDialog.getOpenFileNames(self, self.tr("Select MP3 Files"), "", self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)"))
+        files, _ = QFileDialog.getOpenFileNames(self, self.tr("Select MP3 Files"), self.initial_directory, self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)"))
 
         if not files: return
 
@@ -584,6 +583,6 @@ if __name__ == "__main__":
     import sys
     from PySide6.QtWidgets import QApplication
     app: QApplication = QApplication(sys.argv)
-    player: MP3_Player = MP3_Player(os.path.join(os.environ['USERPROFILE'], 'Music'))
+    player: Mp3Player = Mp3Player(os.path.join(os.environ['USERPROFILE'], 'Music'))
     player.show()
     sys.exit(app.exec())
