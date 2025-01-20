@@ -1,3 +1,4 @@
+from pathlib import Path
 import os, sys
 
 # Import GUI elements from PySide6
@@ -34,12 +35,7 @@ class Mp3Player(QMainWindow):
         """
         super().__init__(parent)
 
-        # Load translations
-        self.translator: QTranslator = QTranslator()
-        translation_file: str = os.path.join(os.path.dirname(sys.argv[0]), "src", "locales", f"{locale}.qm")
-        if self.translator.load(translation_file):
-            QCoreApplication.installTranslator(self.translator)
-
+        self.load_locale(locale)
         self.setWindowTitle(self.tr("MP3 Player"))
         self.setGeometry(100, 100, 1000, 600)
         self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
@@ -75,6 +71,17 @@ class Mp3Player(QMainWindow):
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(100)  # Update progress every 100 ms
 
+    def load_locale(self, locale: str) -> None:
+        # Load translations
+        self.translator: QTranslator = QTranslator()
+        current_path = os.path.dirname(sys.argv[0])
+        if current_path.endswith(("bin", "src")):
+            locales_folder = os.path.join((Path(current_path).parent), "locales")
+        else: locales_folder = os.path.join(current_path, "locales")
+
+        translation_file: str = os.path.join(locales_folder, f"{locale}.qm")
+        if self.translator.load(translation_file):
+            QCoreApplication.installTranslator(self.translator)
 
     def init_gui(self) -> None:
         """Initialize the GUI elements."""        
@@ -523,7 +530,10 @@ class Mp3Player(QMainWindow):
     def load_single_files(self, clear: bool = False) -> None:
         """Load single audio files."""        
         # Open file dialog to select MP3 files
-        files, _ = QFileDialog.getOpenFileNames(self, self.tr("Select MP3 Files"), self.initial_directory, self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)"))
+        files, _ = QFileDialog.getOpenFileNames(self,
+                                                self.tr("Select MP3 Files"),
+                                                self.initial_directory,
+                                                self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)"))
 
         if not files: return
 
