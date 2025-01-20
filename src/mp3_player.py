@@ -165,7 +165,7 @@ class Mp3Player(QMainWindow):
         if self.light_mode:
             self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "dark", "skip.png")))
         else:
-            self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "light", "icon.png")))
+            self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "light", "skip.png")))
         self.skip_button.clicked.connect(self.skip_song)
         slider_layout.addWidget(self.skip_button)
 
