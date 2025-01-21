@@ -338,10 +338,11 @@ class Mp3Player(QMainWindow):
         """Create the menu bar with file and settings actions."""        
         def show_settings() -> None:
             """Show the settings window."""
-            if self.settings_window is None:
-                self.settings_window = SettingsGUI(self.settings_handler, self.translator)
-                self.settings_window.setWindowModality(Qt.ApplicationModal)
-                self.settings_window.show()
+            if self.settings_window:
+                del self.settings_window
+            self.settings_window = SettingsGUI(self.settings_handler, self.translator)
+            self.settings_window.setWindowModality(Qt.ApplicationModal)
+            self.settings_window.show()
 
         # Create the menu bar
         menubar = self.menuBar()

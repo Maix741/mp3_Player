@@ -3,11 +3,11 @@ import os, sys
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
-    QMainWindow, QPushButton, QSlider, QVBoxLayout, QFileDialog, QLabel, QMenu, QWidget, 
-    QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout, QComboBox
+    QPushButton, QSlider, QVBoxLayout, QFileDialog, QLabel, QWidget, 
+    QSpacerItem, QSizePolicy, QDockWidget, QHBoxLayout, QComboBox
 )
-from PySide6.QtCore import Qt
 from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import Qt
 
 
 class SettingsGUI(QDockWidget):
