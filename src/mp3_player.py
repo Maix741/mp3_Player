@@ -15,10 +15,16 @@ import pygame
 if __name__ == "__main__":
     from play_playlist import PlaylistThread
     from load_playlists import SavedPlaylistsHandler
+    from translation_handler import TranslationHandler
+    from settings_handler import SettingsHandler
+    from settings_gui import SettingsGUI
 
 else:
     from .play_playlist import PlaylistThread
     from .load_playlists import SavedPlaylistsHandler
+    from .translation_handler import TranslationHandler
+    from .settings_handler import SettingsHandler
+    from .settings_gui import SettingsGUI
 
 
 class Mp3Player(QMainWindow):
@@ -34,16 +40,24 @@ class Mp3Player(QMainWindow):
             parent ([type], optional): The parent object. Defaults to None.
         """
         super().__init__(parent)
+        # Initialize the settings handler
+        self.settings_handler = SettingsHandler()
 
+        # Set the system locale
+        self.translator: QTranslator = QTranslator()
+        self.translation_handler = TranslationHandler(self.settings_handler, self.translator)
+        QCoreApplication.installTranslator(self.translator)
+
+        # Set the window title and geometry
+        self.setWindowTitle(self.tr("MP3 Player"))
+        self.setGeometry(100, 100, 1000, 600)
+        self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
+
+        # Set the assets path based on current path
         current_path = os.path.dirname(sys.argv[0])
         if current_path.endswith(("bin", "src")):
             self.assets_path: str = os.path.join((Path(current_path).parent), "assets")
         else: self.assets_path: str = os.path.join(current_path, "assets")
-
-        self.load_locale(locale)
-        self.setWindowTitle(self.tr("MP3 Player"))
-        self.setGeometry(100, 100, 1000, 600)
-        self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
 
         # Initialize Pygame mixer
         pygame.mixer.init()
@@ -55,15 +69,19 @@ class Mp3Player(QMainWindow):
         self.current_music: str | None = None
         self.current_index: int = 0
         self.music_length: int = 0
-        self.initial_directory: str | None = initial_directory
-        self.shuffle: bool = shuffle
         self.max_previously_saved: int = 10
         self.previously_played: list[str] = [] # FIXME: currently useless
         self.is_looping: bool = False
 
+        self.initial_directory: str | None = self.settings_handler.get("initial_directory") or initial_directory
+        self.shuffle: bool = self.settings_handler.get("shuffle") or shuffle
+        load_saved = self.settings_handler.get("load_saved_playlist")
+
+        # Initialize the playlist loader
         self.loader: SavedPlaylistsHandler = SavedPlaylistsHandler()
         self.playlist_thread: PlaylistThread | None = None
 
+        # Load existing playlists
         if load_saved:
             self.load_existing_playlists()
         else: self.existing_playlists = {}
@@ -75,18 +93,6 @@ class Mp3Player(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress)
         self.timer.start(100)  # Update progress every 100 ms
-
-    def load_locale(self, locale: str) -> None:
-        # Load translations
-        self.translator: QTranslator = QTranslator()
-        current_path = os.path.dirname(sys.argv[0])
-        if current_path.endswith(("bin", "src")):
-            locales_folder = os.path.join((Path(current_path).parent), "locales")
-        else: locales_folder = os.path.join(current_path, "locales")
-
-        translation_file: str = os.path.join(locales_folder, f"{locale}.qm")
-        if self.translator.load(translation_file):
-            QCoreApplication.installTranslator(self.translator)
 
     def init_gui(self) -> None:
         """Initialize the GUI elements."""        
@@ -181,7 +187,7 @@ class Mp3Player(QMainWindow):
         # Volume slider (bottom)
         self.volume_slider = QSlider(Qt.Horizontal, self)
         self.volume_slider.setRange(0, 100)
-        self.volume_slider.setValue(50)
+        self.volume_slider.setValue(self.settings_handler.get("volume") or 50)
         self.volume_slider.valueChanged.connect(self.set_volume)
         central_layout.addWidget(QLabel(self.tr("Volume")))
         central_layout.addWidget(self.volume_slider)
@@ -329,7 +335,14 @@ class Mp3Player(QMainWindow):
             context_menu.exec(event.globalPos())
 
     def create_menubar(self) -> None:
-        """Create the menu bar with file actions."""        
+        """Create the menu bar with file and settings actions."""        
+        def show_settings() -> None:
+            """Show the settings window."""
+            if self.settings_window is None:
+                self.settings_window = SettingsGUI(self.settings_handler, self.translator)
+                self.settings_window.setWindowModality(Qt.ApplicationModal)
+                self.settings_window.show()
+
         # Create the menu bar
         menubar = self.menuBar()
 
@@ -350,6 +363,18 @@ class Mp3Player(QMainWindow):
         clear_action.triggered.connect(self.clear_playlist)
         file_menu.addAction(clear_action)
 
+        # Create "Prefrences" menu
+        Prefrences_menu = QMenu(self.tr("Prefrences"), self)
+        menubar.addMenu(Prefrences_menu)
+
+        # Add actions to the "Settings" menu
+        settings_action = QAction(self.tr("Settings"), self)
+        self.settings_window = None
+        settings_action.triggered.connect(show_settings)
+
+
+        Prefrences_menu.addAction(settings_action)
+ 
     def clear_playlist(self) -> None:
             """Clear the playlist and stop the current audio."""            
             self.playlist_list.clear()  # Clear the playlist display
@@ -593,6 +618,14 @@ class Mp3Player(QMainWindow):
         # When the user clicks on the slider, move the audio to the selected position
         self.start_value: float = self.progress_slider.value()
         pygame.mixer.music.set_pos(self.start_value)
+
+    def closeEvent(self, event):
+        if self.playlist_thread:
+            self.playlist_thread.stop()
+        self.settings_handler.save()
+
+        pygame.mixer.quit()
+        event.accept()
 
 
 if __name__ == "__main__":
