@@ -25,7 +25,6 @@ class SettingsGUI(QDockWidget):
 
         self.init_ui()
 
-
     def init_ui(self):
         self.main_widget = QWidget()
         self.main_layout = QVBoxLayout(self.main_widget)

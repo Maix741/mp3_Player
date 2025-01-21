@@ -14,7 +14,6 @@ class SettingsHandler:
 
         self.load()
 
-
     def get(self, key: str) -> str | int | bool:
         return self.settings.get(key)
 
