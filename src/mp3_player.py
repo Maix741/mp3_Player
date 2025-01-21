@@ -190,7 +190,7 @@ class Mp3Player(QMainWindow):
         """Create the dock widget with control buttons."""        
         """Recreate the entire dock widget with updated content."""
         # Remove the previous dock widget if it exists
-        if hasattr(self, 'dock_widget'):
+        if hasattr(self, "dock_widget"):
             self.removeDockWidget(self.dock_widget)
             del self.dock_widget
 
@@ -599,6 +599,6 @@ if __name__ == "__main__":
     import sys
     from PySide6.QtWidgets import QApplication
     app: QApplication = QApplication(sys.argv)
-    player: Mp3Player = Mp3Player(os.path.join(os.environ['USERPROFILE'], 'Music'))
+    player: Mp3Player = Mp3Player(os.path.join(os.environ["USERPROFILE"], "Music"))
     player.show()
     sys.exit(app.exec())
