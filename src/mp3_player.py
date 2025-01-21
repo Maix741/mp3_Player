@@ -30,7 +30,7 @@ else:
 class Mp3Player(QMainWindow):
     """A simple MP3 player application using Pygame and PySide6."""
     def __init__(self,
-                 initial_directory: str | None = None, load_saved: bool = True, shuffle: bool = False, locale: str = "en_US",
+                 initial_directory: str = "", load_saved: bool = True, shuffle: bool = False, locale: str = "en_US",
                  parent: QWidget | None = None) -> None:
         """Initialize the MP3 Player.
 
@@ -41,7 +41,7 @@ class Mp3Player(QMainWindow):
         """
         super().__init__(parent)
         # Initialize the settings handler
-        self.settings_handler = SettingsHandler()
+        self.settings_handler: SettingsHandler = SettingsHandler(initial_directory, locale, shuffle, load_saved)
 
         # Set the system locale
         self.translator: QTranslator = QTranslator()
@@ -54,7 +54,7 @@ class Mp3Player(QMainWindow):
         self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
 
         # Set the assets path based on current path
-        current_path = os.path.dirname(sys.argv[0])
+        current_path: str = os.path.dirname(sys.argv[0])
         if current_path.endswith(("bin", "src")):
             self.assets_path: str = os.path.join((Path(current_path).parent), "assets")
         else: self.assets_path: str = os.path.join(current_path, "assets")
@@ -73,9 +73,9 @@ class Mp3Player(QMainWindow):
         self.previously_played: list[str] = [] # FIXME: currently useless
         self.is_looping: bool = False
 
-        self.initial_directory: str | None = self.settings_handler.get("initial_directory") or initial_directory
-        self.shuffle: bool = self.settings_handler.get("shuffle") or shuffle
-        load_saved = self.settings_handler.get("load_saved_playlist")
+        self.initial_directory: str | None = self.settings_handler.get("initial_directory")
+        self.shuffle: bool = self.settings_handler.get("shuffle")
+        load_saved: bool = self.settings_handler.get("load_saved_playlist")
 
         # Initialize the playlist loader
         self.loader: SavedPlaylistsHandler = SavedPlaylistsHandler()
