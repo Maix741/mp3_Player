@@ -3,7 +3,7 @@ import os, sys
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
-    QPushButton, QSlider, QVBoxLayout, QFileDialog, QLabel, QWidget, 
+    QPushButton, QSlider, QVBoxLayout, QFileDialog, QLabel, QWidget, QLineEdit,
     QSpacerItem, QSizePolicy, QDockWidget, QHBoxLayout, QComboBox
 )
 from PySide6.QtCore import QCoreApplication
@@ -26,6 +26,7 @@ class SettingsGUI(QDockWidget):
         self.init_ui()
 
     def init_ui(self):
+        self.setGeometry(100, 100, 300, 300)
         self.main_widget = QWidget()
         self.main_layout = QVBoxLayout(self.main_widget)
 
@@ -37,6 +38,9 @@ class SettingsGUI(QDockWidget):
         # Initial Directory
         self.initial_directory_label = QLabel(self.tr("Initial Directory:"))
         self.labels_layout.addWidget(self.initial_directory_label)
+
+        self.initial_directory_display = QLabel(self.settings_handler.get("initial_directory"))
+        self.settings_layout.addWidget(self.initial_directory_display)
 
         self.initial_directory_button = QPushButton(self.tr("Select Initial Directory"))
         self.initial_directory_button.clicked.connect(self.select_initial_directory)
@@ -57,11 +61,20 @@ class SettingsGUI(QDockWidget):
         self.volume_label = QLabel(self.tr("Default volume:"))
         self.labels_layout.addWidget(self.volume_label)
 
+        self.volume_layout = QHBoxLayout()
         self.volume_slider = QSlider(Qt.Horizontal)
         self.volume_slider.setRange(0, 100)
-        self.volume_slider.setValue(self.settings_handler.get("volume"))
+        self.volume_slider.setValue(int(self.settings_handler.get("volume")))
         self.volume_slider.valueChanged.connect(self.set_volume)
-        self.settings_layout.addWidget(self.volume_slider)
+        self.volume_layout.addWidget(self.volume_slider)
+
+        self.volume_input = QLineEdit()
+        self.volume_input.setFixedWidth(30)
+        self.volume_input.setText(str(self.settings_handler.get("volume")))
+        self.volume_input.textChanged.connect(self.set_volume)
+        self.volume_layout.addWidget(self.volume_input)
+
+        self.settings_layout.addLayout(self.volume_layout)
 
         # Shuffle
         self.shuffle_label = QLabel(self.tr("Shuffle:"))
@@ -96,24 +109,43 @@ class SettingsGUI(QDockWidget):
 
         # Save button
         self.save_button = QPushButton(self.tr("Save"))
-        self.save_button.clicked.connect(self.close)
+        self.save_button.clicked.connect(self.save_settings_and_close)
         self.buttons_layout.addWidget(self.save_button)
 
         # Save and restart button
         self.save_restart_button = QPushButton(self.tr("Save and Restart"))
-        self.save_restart_button.clicked.connect(lambda: [self.settings_handler.save(), os.execl(sys.executable, sys.executable, *sys.argv)])
+        self.save_restart_button.clicked.connect(self.save_settings_and_restart)
         self.buttons_layout.addWidget(self.save_restart_button)
 
         self.main_layout.addLayout(self.buttons_layout)
 
         self.setWidget(self.main_widget)
 
+    def save_settings_and_close(self) -> None:
+        """
+        Save the current settings and close the settings window.
+        """
+        self.settings_handler.save()
+        self.close()
+
+    def save_settings_and_restart(self) -> None:
+        self.settings_handler.save()
+        QCoreApplication.quit()
+        os.execl(sys.executable, sys.executable, *sys.argv)
+
     def select_initial_directory(self) -> None:
         directory = QFileDialog.getExistingDirectory(self, self.tr("Select Initial Directory"))
         if directory:
             self.settings_handler.set("initial_directory", directory)
+            self.initial_directory_display.setText(directory)
 
     def set_volume(self, value: int) -> None:
+        if not value and not str(value).isdigit():
+            value: int = 0
+        elif int(value) > 100:
+            value: int = 100
+        self.volume_input.setText(str(value))
+        self.volume_slider.setValue(int(value))
         self.settings_handler.set("volume", value)
 
     def set_locale(self) -> None:

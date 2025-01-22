@@ -31,6 +31,7 @@ class SettingsHandler:
         self.settings[key] = value
 
     def save(self):
+        os.makedirs(os.path.dirname(self.settings_file), exist_ok=True)
         with open(self.settings_file, "w") as file:
             json.dump(self.settings, file, indent=4)
 

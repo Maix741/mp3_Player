@@ -37,7 +37,7 @@ class Mp3Player(QMainWindow):
         Args:
             initial_directory (str, optional): The initial directory to load files from. Defaults to None.
             load_saved (bool, optional): Whether to load saved playlists. Defaults to True.
-            parent ([type], optional): The parent object. Defaults to None.
+            parent (QWidget | None, optional): The parent object. Defaults to None.
         """
         super().__init__(parent)
         # Initialize the settings handler
@@ -52,12 +52,14 @@ class Mp3Player(QMainWindow):
         self.setWindowTitle(self.tr("MP3 Player"))
         self.setGeometry(100, 100, 1000, 600)
         self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
+        self.settings_window = None
 
         # Set the assets path based on current path
         current_path: str = os.path.dirname(sys.argv[0])
         if current_path.endswith(("bin", "src")):
             self.assets_path: str = os.path.join((Path(current_path).parent), "assets")
-        else: self.assets_path: str = os.path.join(current_path, "assets")
+        else:
+            self.assets_path: str = os.path.join(current_path, "assets")
 
         # Initialize Pygame mixer
         pygame.mixer.init()
@@ -75,14 +77,13 @@ class Mp3Player(QMainWindow):
 
         self.initial_directory: str | None = self.settings_handler.get("initial_directory")
         self.shuffle: bool = self.settings_handler.get("shuffle")
-        load_saved: bool = self.settings_handler.get("load_saved_playlist")
+        load_saved_playlist: bool = self.settings_handler.get("load_saved_playlist")
 
         # Initialize the playlist loader
         self.loader: SavedPlaylistsHandler = SavedPlaylistsHandler()
         self.playlist_thread: PlaylistThread | None = None
 
-        # Load existing playlists
-        if load_saved:
+        if load_saved_playlist:
             self.load_existing_playlists()
         else: self.existing_playlists = {}
 
@@ -178,7 +179,6 @@ class Mp3Player(QMainWindow):
         # Add the slider layout to the progress layout
         progress_layout.addLayout(slider_layout)
 
-        self.skip_button.clicked.connect(self.play_next)
         progress_layout.addWidget(self.skip_button)
 
         # Add the progress layout to the central layout
@@ -365,8 +365,8 @@ class Mp3Player(QMainWindow):
         file_menu.addAction(clear_action)
 
         # Create "Prefrences" menu
-        Prefrences_menu = QMenu(self.tr("Prefrences"), self)
-        menubar.addMenu(Prefrences_menu)
+        Preferences_menu = QMenu(self.tr("Preferences"), self)
+        menubar.addMenu(Preferences_menu)
 
         # Add actions to the "Settings" menu
         settings_action = QAction(self.tr("Settings"), self)
@@ -374,20 +374,20 @@ class Mp3Player(QMainWindow):
         settings_action.triggered.connect(show_settings)
 
 
-        Prefrences_menu.addAction(settings_action)
+        Preferences_menu.addAction(settings_action)
  
     def clear_playlist(self) -> None:
-            """Clear the playlist and stop the current audio."""            
-            self.playlist_list.clear()  # Clear the playlist display
-            self.media_files.clear()  # Clear the playlist
+        """Clear the playlist and stop the current audio."""            
+        self.playlist_list.clear()  # Clear the playlist display
+        self.media_files.clear()  # Clear the playlist
 
-            self.current_index = 0
-            self.current_music = None
-            self.update_current_song()
+        self.current_index = 0
+        self.current_music = None
+        self.update_current_song()
 
-            if pygame.mixer.music.get_busy():
-                pygame.mixer.music.stop()
-            pygame.mixer.music.unload()
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+        pygame.mixer.music.unload()
 
     def play_playlist(self) -> None:
         """Play the entire playlist."""        
@@ -474,7 +474,7 @@ class Mp3Player(QMainWindow):
         if not pygame.mixer.music.get_busy():
             return
 
-        if pygame.mixer.music.get_endevent() == pygame.USEREVENT:
+        if pygame.mixer.music.get_endevent() == pygame.constants.USEREVENT:
             pygame.mixer.music.set_endevent()
             self.is_looping = False
             if self.playlist_thread:
@@ -484,7 +484,7 @@ class Mp3Player(QMainWindow):
 
         else:
             self.is_looping = True
-            pygame.mixer.music.set_endevent(pygame.USEREVENT)
+            pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
             if self.playlist_thread:
                 self.playlist_thread.is_looping.emit(self.is_looping)
 
@@ -625,6 +625,7 @@ class Mp3Player(QMainWindow):
             self.playlist_thread.stop()
         self.settings_handler.save()
 
+        self.timer.stop()
         pygame.mixer.quit()
         event.accept()
 

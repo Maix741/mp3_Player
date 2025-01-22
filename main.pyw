@@ -8,10 +8,10 @@ from src import Mp3Player
 
 if __name__ == "__main__":
     if platform.system() == "Windows":
-        initial_directory: str = os.path.join(os.environ["USERPROFILE"], "Music")
+        initial_directory: str = os.path.join(os.environ.get("USERPROFILE", ""), "Music")
         system_locale: str = locale.getlocale()[0]
     else:
-        initial_directory: str = ""
+        initial_directory: str = os.path.expanduser("~/Music")
         system_locale: str = "en_US"
 
     app: QApplication = QApplication(sys.argv)

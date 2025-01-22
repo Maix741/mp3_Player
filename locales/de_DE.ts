@@ -57,7 +57,7 @@
     <message>
         <location filename="../src/mp3_player.py" line="244"/>
         <source>Add from Folder</source>
-        <translation>Aus Ordner hinzufügen</translation>
+        <translation>Neu aus Ordner</translation>
     </message>
     <message>
         <location filename="../src/mp3_player.py" line="280"/>
