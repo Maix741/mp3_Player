@@ -25,7 +25,7 @@ class SettingsGUI(QDockWidget):
 
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         self.setGeometry(100, 100, 300, 300)
         self.main_widget = QWidget()
         self.main_layout = QVBoxLayout(self.main_widget)
@@ -162,13 +162,15 @@ class SettingsGUI(QDockWidget):
         event.accept()
 
     def get_possible_locales(self) -> list[str]:
-        current_dir = os.path.dirname(sys.argv[0])
-        if current_dir.endswith(("src", "bin")):
-            locales_path = os.path.join(Path(current_dir).parent, "locales")
-        else: # Running from root directory
-            locales_path = os.path.join(current_dir, "locales")
+        if not hasattr(self, '_cached_locales'):
+            current_dir = os.path.dirname(sys.argv[0])
+            if current_dir.endswith(("src", "bin")):
+                locales_path = os.path.join(Path(current_dir).parent, "locales")
+            else: # Running from root directory
+                locales_path = os.path.join(current_dir, "locales")
 
-        return [locale.rstrip(".qm") for locale in os.listdir(locales_path) if locale.endswith(".qm")]
+            self._cached_locales = [locale.rstrip(".qm") for locale in os.listdir(locales_path) if locale.endswith(".qm")]
+        return self._cached_locales
 
 
 if __name__ == "__main__":
