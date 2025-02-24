@@ -4,7 +4,7 @@ import os, sys
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
     QPushButton, QSlider, QVBoxLayout, QFileDialog, QLabel, QWidget, QLineEdit,
-    QSpacerItem, QSizePolicy, QDockWidget, QHBoxLayout, QComboBox
+    QSpacerItem, QSizePolicy, QDockWidget, QHBoxLayout, QComboBox, QMessageBox
 )
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtCore import Qt
@@ -15,6 +15,7 @@ class SettingsGUI(QDockWidget):
         super().__init__(parent)
 
         self.settings_handler = settings_handler
+        self.locale_changed: bool = False
 
         self.setWindowTitle(self.tr("Settings"))
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -113,18 +114,19 @@ class SettingsGUI(QDockWidget):
         self.buttons_layout.addWidget(self.save_button)
 
         # Save and restart button
-        self.save_restart_button = QPushButton(self.tr("Save and Restart"))
-        self.save_restart_button.clicked.connect(self.save_settings_and_restart)
-        self.buttons_layout.addWidget(self.save_restart_button)
+        # self.save_restart_button = QPushButton(self.tr("Save and Restart"))
+        # self.save_restart_button.clicked.connect(self.save_settings_and_restart)
+        # self.buttons_layout.addWidget(self.save_restart_button)
 
         self.main_layout.addLayout(self.buttons_layout)
 
         self.setWidget(self.main_widget)
 
     def save_settings_and_close(self) -> None:
+        """Save the current settings and close the settings window.
         """
-        Save the current settings and close the settings window.
-        """
+        if self.locale_changed:
+            QMessageBox.information(self, self.tr("Restart required"), self.tr("Restarting the app is required\n for all changes to take affect"))
         self.settings_handler.save()
         self.close()
 
@@ -146,9 +148,10 @@ class SettingsGUI(QDockWidget):
             value: int = 100
         self.volume_input.setText(str(value))
         self.volume_slider.setValue(int(value))
-        self.settings_handler.set("volume", value)
+        self.settings_handler.set("volume", int(value))
 
     def set_locale(self) -> None:
+        self.locale_changed: bool = True
         self.settings_handler.set("system_locale", self.system_locale_option.currentText())
 
     def set_shuffle(self) -> None:

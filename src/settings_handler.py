@@ -27,15 +27,15 @@ class SettingsHandler:
     def get(self, key: str) -> str | int | bool:
         return self.settings.get(key)
 
-    def set(self, key: str, value: str |int | bool) -> None:
+    def set(self, key: str, value: str | int | bool) -> None:
         self.settings[key] = value
 
-    def save(self):
+    def save(self) -> None:
         os.makedirs(os.path.dirname(self.settings_file), exist_ok=True)
         with open(self.settings_file, "w") as file:
             json.dump(self.settings, file, indent=4)
 
-    def load(self):
+    def load(self) -> None:
         try:
             with open(self.settings_file, "r") as file:
                 self.settings: dict[str, str] = json.loads(file.read())
@@ -57,5 +57,5 @@ class SettingsHandler:
 
 
 if __name__ == "__main__":
-    handler = SettingsHandler()
+    handler: SettingsHandler = SettingsHandler()
     print(handler.settings)

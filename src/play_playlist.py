@@ -11,6 +11,7 @@ class PlaylistThread(QThread):
     is_alive: bool = True
     is_paused: Signal = Signal(bool)
     is_looping: Signal = Signal(bool)
+    rewinded: Signal = Signal(bool)
 
     def __init__(self, media_files: list[str], shuffle: bool = False, parent=None) -> None:
         """Initialize the Playlist Thread.
@@ -35,6 +36,15 @@ class PlaylistThread(QThread):
             paused (bool): The new paused state.
         """
         self._is_paused = paused
+
+    @Slot(bool)
+    def update_rewind_state(self, rewinded: bool) -> None:
+        """Update the paused state of the thread.
+
+        Args:
+            paused (bool): The new paused state.
+        """
+        self._rewinded = rewinded
 
     @Slot(bool)
     def update_looping_state(self, looping: bool) -> None:
@@ -63,7 +73,12 @@ class PlaylistThread(QThread):
                 if not self._is_paused and not pygame.mixer.music.get_busy():
                     if self.is_looping:
                         pygame.mixer.music.play()
-                    else: pygame.mixer.music.unpause()
+                    else:
+                        if self._rewinded:
+                            self.media_files.reverse()
+                            self._rewinded = False
+                            break
+                        pygame.mixer.music.unpause()
                 if not self._is_paused:
                     self.disable_progress_slider.emit(False)
                 self.msleep(200)  # Sleep to avoid blocking the thread
@@ -73,10 +88,12 @@ class PlaylistThread(QThread):
     def terminate(self):
         """Terminate the Playlist Thread."""
         self.is_alive = False
-        self.msleep(100)
+        self.msleep(201)
+        pygame.mixer.init()
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
         self.song_changed.emit(None)
+
         return super().terminate()
 
     def stop(self):

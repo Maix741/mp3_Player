@@ -3,9 +3,6 @@ import os, sys
 
 from PySide6.QtCore import QTranslator, QCoreApplication
 
-if __name__ == "__main__":
-    from settings_handler import SettingsHandler
-
 
 class TranslationHandler:
     def __init__(self, settings_handler, translator) -> None:

@@ -63,7 +63,7 @@ class Mp3Player(QMainWindow):
 
         # Initialize Pygame mixer
         pygame.mixer.init()
-        self.start_value: int = 0
+        self.start_value: float = 0.0
 
         # Initialize variables
         self.audio_file_types: tuple[str] = (".mp3", ".wav", ".ogg", ".flac")
@@ -187,7 +187,7 @@ class Mp3Player(QMainWindow):
         # Volume slider (bottom)
         self.volume_slider = QSlider(Qt.Horizontal, self)
         self.volume_slider.setRange(0, 100)
-        self.volume_slider.setValue(self.settings_handler.get("volume") or 50)
+        self.volume_slider.setValue(int(self.settings_handler.get("volume")) or 50)
         self.volume_slider.valueChanged.connect(self.set_volume)
         central_layout.addWidget(QLabel(self.tr("Volume")))
         central_layout.addWidget(self.volume_slider)
@@ -415,9 +415,13 @@ class Mp3Player(QMainWindow):
         if song:
             self.previously_played.append(song)
             display_name = os.path.basename(song)
+            self.set_slider_range(song)
+
         elif self.current_music:
             self.previously_played.append(self.current_music)
             display_name = os.path.basename(self.current_music)
+            self.set_slider_range(self.current_music)
+
         else:
             display_name = self.tr("None")
 
@@ -436,7 +440,6 @@ class Mp3Player(QMainWindow):
         self.play_playlist_button.setText(self.tr("Play Playlist"))
         self.play_button.setText(self.tr("Play"))
 
-        self.progress_slider.setDisabled(True)
         self.progress_slider.setDisabled(True)
 
     def toggle_play_pause(self) -> None:
@@ -462,7 +465,12 @@ class Mp3Player(QMainWindow):
             self.play_next()
 
     def skip_song(self) -> None:
-        """Skip to the next song in the playlist."""        
+        """Skip to the next song in the playlist."""
+        if self.playlist_thread: # If a playlist is playing, don't reset the play button
+            pygame.mixer.music.stop()
+            pygame.mixer.music.unload()
+
+        self.progress_slider.setValue(0)
         if self.shuffle:
             self.current_index = (self.current_index + 1) % len(self.media_files)
         else:
@@ -492,14 +500,18 @@ class Mp3Player(QMainWindow):
 
     def rewind_song(self) -> None:
         """Rewind to the previous song in the playlist."""        
-        if self.shuffle:
-            self.current_index = (self.current_index - 1) % len(self.media_files)
-        else:
-            self.current_index = (self.current_index - 1) % len(self.media_files)
+        if not self.previously_played or not len(self.previously_played) > 1:
+            self.stop_audio()
+            return
+
+        song: str = self.previously_played.pop(-2)
+        self.previously_played.pop(-1)
+
+        self.current_index: int = self.media_files.index(song)
         self.play_next()
 
     def stop_audio(self) -> None:
-        """Stop the current audio and reset the buttons."""        
+        """Stop the current audio and reset the buttons."""
         self.progress_slider.setDisabled(True)
         pygame.mixer.music.stop()
         pygame.mixer.music.unload()
@@ -564,7 +576,8 @@ class Mp3Player(QMainWindow):
         files, _ = QFileDialog.getOpenFileNames(self,
                                                 self.tr("Select MP3 Files"),
                                                 self.initial_directory,
-                                                self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)"))
+                                                self.tr("audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)")
+                                                )
 
         if not files: return
 
@@ -600,7 +613,11 @@ class Mp3Player(QMainWindow):
         pygame.mixer.music.play()
 
         # Get the length of the music in seconds and set the slider's range
-        self.music_length = pygame.mixer.Sound(self.current_music).get_length()
+        self.set_slider_range(self.current_music)
+
+    def set_slider_range(self, song: str) -> None:
+        self.start_value: float = 0.0
+        self.music_length = pygame.mixer.Sound(song).get_length()
         self.progress_slider.setRange(0, int(self.music_length))
 
     def update_progress(self) -> None:
@@ -620,7 +637,7 @@ class Mp3Player(QMainWindow):
         self.start_value: float = self.progress_slider.value()
         pygame.mixer.music.set_pos(self.start_value)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         if self.playlist_thread:
             self.playlist_thread.stop()
         self.settings_handler.save()
@@ -633,6 +650,7 @@ class Mp3Player(QMainWindow):
 if __name__ == "__main__":
     import sys
     from PySide6.QtWidgets import QApplication
+
     app: QApplication = QApplication(sys.argv)
     player: Mp3Player = Mp3Player(os.path.join(os.environ["USERPROFILE"], "Music"))
     player.show()
