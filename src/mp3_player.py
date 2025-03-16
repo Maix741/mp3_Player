@@ -53,9 +53,10 @@ class Mp3Player(QMainWindow):
         self.setGeometry(100, 100, 1000, 600)
 
         # set the windows design to ether the setting or system
-        if self.settings_handler.get("design") == 0:
-            self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
-        else: self.light_mode = self.settings_handler.get("design") == 2
+        self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
+        # if self.settings_handler.get("design") == 0:
+        #     self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
+        # else: self.light_mode = self.settings_handler.get("design") == 2
 
         self.settings_window = None
 

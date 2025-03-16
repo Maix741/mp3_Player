@@ -99,13 +99,13 @@ class SettingsGUI(QDockWidget):
 
         # design
         self.design_label = QLabel(self.tr("Window Design:"))
-        self.labels_layout.addWidget(self.design_label)
+        # self.labels_layout.addWidget(self.design_label)
 
         self.design_option = QComboBox()
         self.design_option.addItems([self.tr("System design"), self.tr("Dark"), self.tr("Light")])
         self.design_option.setCurrentText(self.settings_handler.get("design") or self.tr("System design"))
         self.design_option.currentTextChanged.connect(self.set_design)
-        self.settings_layout.addWidget(self.design_option)
+        # self.settings_layout.addWidget(self.design_option)
 
 
         # Add layouts to main layout
