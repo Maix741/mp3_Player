@@ -51,7 +51,12 @@ class Mp3Player(QMainWindow):
         # Set the window title and geometry
         self.setWindowTitle(self.tr("MP3 Player"))
         self.setGeometry(100, 100, 1000, 600)
-        self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
+
+        # set the windows design to ether the setting or system
+        if self.settings_handler.get("design") == 0:
+            self.light_mode: bool = self.palette().color(self.backgroundRole()).lightness() > 128
+        else: self.light_mode = self.settings_handler.get("design") == 2
+
         self.settings_window = None
 
         # Set the assets path based on current path

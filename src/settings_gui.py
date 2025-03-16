@@ -15,7 +15,7 @@ class SettingsGUI(QDockWidget):
         super().__init__(parent)
 
         self.settings_handler = settings_handler
-        self.locale_changed: bool = False
+        self.restart_required: bool = False
 
         self.setWindowTitle(self.tr("Settings"))
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -97,6 +97,17 @@ class SettingsGUI(QDockWidget):
         self.load_saved_playlist_option.currentTextChanged.connect(self.set_load_saved_playlist)
         self.settings_layout.addWidget(self.load_saved_playlist_option)
 
+        # design
+        self.design_label = QLabel(self.tr("Window Design:"))
+        self.labels_layout.addWidget(self.design_label)
+
+        self.design_option = QComboBox()
+        self.design_option.addItems([self.tr("System design"), self.tr("Dark"), self.tr("Light")])
+        self.design_option.setCurrentText(self.settings_handler.get("design") or self.tr("System design"))
+        self.design_option.currentTextChanged.connect(self.set_design)
+        self.settings_layout.addWidget(self.design_option)
+
+
         # Add layouts to main layout
         self.form_layout.addLayout(self.labels_layout)
         self.form_layout.addLayout(self.settings_layout)
@@ -125,7 +136,7 @@ class SettingsGUI(QDockWidget):
     def save_settings_and_close(self) -> None:
         """Save the current settings and close the settings window.
         """
-        if self.locale_changed:
+        if self.restart_required:
             QMessageBox.information(self, self.tr("Restart required"), self.tr("Restarting the app is required\n for all changes to take affect"))
         self.settings_handler.save()
         self.close()
@@ -151,7 +162,7 @@ class SettingsGUI(QDockWidget):
         self.settings_handler.set("volume", int(value))
 
     def set_locale(self) -> None:
-        self.locale_changed: bool = True
+        self.restart_required: bool = True
         self.settings_handler.set("system_locale", self.system_locale_option.currentText())
 
     def set_shuffle(self) -> None:
@@ -159,6 +170,10 @@ class SettingsGUI(QDockWidget):
 
     def set_load_saved_playlist(self) -> None:
         self.settings_handler.set("load_saved_playlist", self.load_saved_playlist_option.currentText() == self.tr("True"))
+
+    def set_design(self) -> None:
+        self.settings_handler.set("design", self.design_option.currentText() == self.tr("True"))
+        self.restart_required: bool = True
 
     def closeEvent(self, event) -> None:
         self.settings_handler.save()
