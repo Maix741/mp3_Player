@@ -11,10 +11,41 @@ class SavedPlaylistsHandler:
                                                 "Playlists"
                                                 ))
 
+        self.playlist_tester: PlaylistTester = PlaylistTester()
 
-    def load_playlists(self) -> dict[str, list[str]]:
-        """Load the saved Playlists.
+    def get_playlist(self, name: str) -> list[str]:
+        """Get the playlist for its name
         
+        Args:
+        """
+        if not os.path.isdir(self.playlists_path):
+            return []
+
+        file_path: str = os.path.join(self.playlists_path, name)
+        playlist: list[str] = []
+
+        with open(file_path, "r") as file:
+            playlist = json.load(file)
+
+
+        return self.playlist_tester.test_playlist(name, playlist)
+
+    def load_names(self) -> list[str]:
+        """Load the saved Playlist's names.
+
+        Returns:
+            list[str]: The saved Playlist's name.
+        """
+        if not os.path.isdir(self.playlists_path):
+            return []
+
+        names: list[str] = os.listdir(self.playlists_path)
+
+        return names
+
+    def load_playlists(self) -> dict[str, list[str]]: # RAM intensive, bacause it loads every name and file_path
+        """Load the saved Playlists.
+
         Returns:
             dict[str, list[str]]: The saved Playlists (dict[playlist_name, playlist]).
         """
@@ -83,8 +114,26 @@ class SavedPlaylistsHandler:
         os.remove(os.path.join(self.playlists_path, f"{playlist_name}.json"))
 
 
+class PlaylistTester:
+    def test_all(self, playlists: dict[str, list[str]]) -> dict[str, list[str]]:
+        for name, playlist in playlists.items():
+            playlist = self.test_playlist(name, playlist)
+            playlists[name] = playlist
+
+        return playlists
+
+    def test_playlist(self, name: str, playlist: list[str]) -> list[str]:
+        if not (name or playlist):
+            return []
+
+        playlist: list[str] = [path for path in playlist if os.path.isfile(path)]
+
+        return playlist
+
+
 if __name__ == "__main__":
     loader: SavedPlaylistsHandler = SavedPlaylistsHandler()
-    playlists: dict[str, list[str]] = loader.load_playlists()
-    for name, playlist in zip(playlists.keys(), playlists.values()):
+    names: list[str] = loader.load_names()
+    for name in names:
+        playlist: list[str] = loader.get_playlist(name)
         print(f"Playlist: {name} -- lenght: {len(playlist)}")

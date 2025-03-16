@@ -14,14 +14,14 @@ import pygame
 
 if __name__ == "__main__":
     from play_playlist import PlaylistThread
-    from load_playlists import SavedPlaylistsHandler
+    from saved_playlists_handler import SavedPlaylistsHandler
     from translation_handler import TranslationHandler
     from settings_handler import SettingsHandler
     from settings_gui import SettingsGUI
 
 else:
     from .play_playlist import PlaylistThread
-    from .load_playlists import SavedPlaylistsHandler
+    from .saved_playlists_handler import SavedPlaylistsHandler
     from .translation_handler import TranslationHandler
     from .settings_handler import SettingsHandler
     from .settings_gui import SettingsGUI
@@ -85,7 +85,7 @@ class Mp3Player(QMainWindow):
 
         if load_saved_playlist:
             self.load_existing_playlists()
-        else: self.existing_playlists = {}
+        else: self.existing_playlists = []
 
         # Create UI elements
         self.init_gui()
@@ -262,11 +262,12 @@ class Mp3Player(QMainWindow):
         dock_layout.addWidget(scroll_area)
 
         # Add new buttons based on the updated playlists
-        for name in self.existing_playlists.keys():
-            playlist_button = QPushButton(name, self)
+        for name in self.existing_playlists:
+            playlist_button: QPushButton = QPushButton(name.split(".")[0], self)
             playlist_button.clicked.connect(partial(self.load_playlist, name))
             playlist_button.setContextMenuPolicy(Qt.CustomContextMenu)
             playlist_button.customContextMenuRequested.connect(partial(self.show_playlist_context_menu, name, playlist_button))
+
             button_layout.addWidget(playlist_button)
 
         # Add a spacer to ensure buttons stay at the top if there is extra space
@@ -305,7 +306,9 @@ class Mp3Player(QMainWindow):
         # remove from saved playlist
         if not self.existing_playlists:
             return
-        for playlist, name in zip(self.existing_playlists.values(), self.existing_playlists.keys()):
+
+        for name in self.existing_playlists: # TODO: resource intensive
+            playlist: list[str] = self.loader.get_playlist(name)
             if song_path in playlist:
                 self.loader.remove_from_playlist(name, self.current_music)
 
@@ -538,13 +541,15 @@ class Mp3Player(QMainWindow):
 
     def load_playlist(self, name: str) -> None:
         """Load an existing playlist."""        
+        playlist: list[str] = self.loader.get_playlist(name)
+
         self.playlist_list.clear()
-        self.playlist_list.addItems([os.path.basename(file) for file in self.existing_playlists[name]]) # Display the Songnames in the playlist in the widget
-        self.media_files = self.existing_playlists[name]
+        self.playlist_list.addItems([os.path.basename(file) for file in playlist]) # Display the Songnames in the playlist in the widget
+        self.media_files = playlist
 
     def load_existing_playlists(self) -> None:
-        """Load the existing playlists."""        
-        self.existing_playlists: dict[str, list[str]] = self.loader.load_playlists()
+        """Load the existing playlists."""
+        self.existing_playlists: list[str] = self.loader.load_names()
 
     def save_playlist(self) -> None:
         """Save the current playlist."""        

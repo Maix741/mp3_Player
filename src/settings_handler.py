@@ -21,6 +21,7 @@ class SettingsHandler:
         self.system_locale: str = locale
         self.shuffle: bool = shuffle
         self.volume: int = 50
+        self.design: int = 0    # Literal[0, 1, 2] 0 -> system, 1 -> dark, 2 -> light
 
         self.load()
 
@@ -51,7 +52,8 @@ class SettingsHandler:
             "system_locale": self.system_locale,
             "volume": 50,
             "shuffle": self.shuffle,
-            "load_saved_playlist": self.load_saved_playlist
+            "load_saved_playlist": self.load_saved_playlist,
+            "design": self.design
         }
         self.save()
 
