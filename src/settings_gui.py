@@ -180,7 +180,7 @@ class SettingsGUI(QDockWidget):
         event.accept()
 
     def get_possible_locales(self) -> list[str]:
-        if not hasattr(self, '_cached_locales'):
+        if not hasattr(self, "_cached_locales"):
             current_dir = os.path.dirname(sys.argv[0])
             if current_dir.endswith(("src", "bin")):
                 locales_path = os.path.join(Path(current_dir).parent, "locales")
