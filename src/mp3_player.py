@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt, QTimer
 from functools import partial
 
 if __name__ == "__main__":
-    from play_playlist import PlaylistThread
+    from playlist_thread import PlaylistThread
     from saved_playlists_handler import SavedPlaylistsHandler
     from translation_handler import TranslationHandler
     from settings_handler import SettingsHandler
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     from settings_gui import SettingsGUI
 
 else:
-    from .play_playlist import PlaylistThread
+    from .playlist_thread import PlaylistThread
     from .saved_playlists_handler import SavedPlaylistsHandler
     from .translation_handler import TranslationHandler
     from .settings_handler import SettingsHandler
@@ -79,7 +79,6 @@ class Mp3Player(QMainWindow):
         self.media_files: list[str] = [] # List to keep track of loaded media files
         self.current_music: str | None = None
         self.current_index: int = 0
-        self.music_length: int = 0
         self.max_previously_saved: int = 10
         self.previously_played: list[str] = [] # FIXME: currently useless
         self.is_looping: bool = False
@@ -172,7 +171,6 @@ class Mp3Player(QMainWindow):
         self.progress_slider = QSlider(Qt.Horizontal, self)
         self.progress_slider.setRange(0, 100)
         self.progress_slider.sliderPressed.connect(self.seek_audio)
-        self.progress_slider.setDisabled(True)
         slider_layout.addWidget(self.progress_slider)
 
         # Skip button
@@ -406,14 +404,14 @@ class Mp3Player(QMainWindow):
         """Play the entire playlist."""
         if self.play_playlist_button.text() == self.tr("Stop Playlist"):
             self.on_playlist_finished()
+            return
 
         # Create and start the playlist thread
-        self.playlist_thread = PlaylistThread(self.media_files, self.shuffle)
+        self.playlist_thread: PlaylistThread = PlaylistThread(self.music_handler, self.media_files, self.shuffle)
 
         self.playlist_thread.is_paused.emit(False)
         self.playlist_thread.is_looping.emit(self.is_looping)
         self.playlist_thread.song_changed.connect(self.update_current_song)
-        self.playlist_thread.disable_progress_slider.connect(self.progress_slider.setDisabled)
         self.playlist_thread.finished.connect(self.on_playlist_finished)
 
         self.play_playlist_button.setText(self.tr("Stop Playlist"))
@@ -450,10 +448,12 @@ class Mp3Player(QMainWindow):
         """Stop the playlist and reset the buttons."""
         self.playlist_thread.stop()
 
+        self.progress_slider.setValue(0)
+        self.progress_slider.setDisabled(True)
         self.play_playlist_button.setText(self.tr("Play Playlist"))
         self.play_button.setText(self.tr("Play"))
 
-        self.progress_slider.setDisabled(True)
+        self.playlist_thread = None
 
     def toggle_play_pause(self) -> None:
         """Toggle between play and pause states."""
@@ -466,7 +466,6 @@ class Mp3Player(QMainWindow):
             return
 
         else:
-            self.progress_slider.setDisabled(False)
             self.music_handler.unpause()
             if self.playlist_thread:
                 self.playlist_thread.is_paused.emit(False)
@@ -477,8 +476,9 @@ class Mp3Player(QMainWindow):
 
     def skip_song(self) -> None:
         """Skip to the next song in the playlist."""
-        if self.playlist_thread: # If a playlist is playing, don't reset the play button
-            self.music_handler.stop_and_unload()
+        if self.playlist_thread:
+            self.stop_audio()
+            return
 
         self.progress_slider.setValue(0)
         if self.shuffle:
@@ -520,7 +520,6 @@ class Mp3Player(QMainWindow):
 
     def stop_audio(self) -> None:
         """Stop the current audio and reset the buttons."""
-        self.progress_slider.setDisabled(True)
         self.music_handler.stop_and_unload()
 
         if not self.playlist_thread: # If a playlist is playing, don't reset the play button
@@ -597,7 +596,7 @@ class Mp3Player(QMainWindow):
         self.media_files.extend(files) # Add the selected songs to the playlist
 
         self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
-
+ 
     def play_selected(self) -> None:
         """Play the selected item in the playlist."""
         # Play the selected item in the playlist
@@ -613,7 +612,6 @@ class Mp3Player(QMainWindow):
             return
 
         self.play_button.setText(self.tr("Pause"))
-        self.progress_slider.setDisabled(False)
         if not media_file:
             self.current_music = self.media_files[self.current_index]
         else: self.current_music = media_file
@@ -626,18 +624,22 @@ class Mp3Player(QMainWindow):
 
     def set_slider_range(self, song: str) -> None:
         self.start_value: float = 0.0
-        self.music_length = self.music_handler.get_lenght(song)
-        self.progress_slider.setRange(0, int(self.music_length))
+        music_length: float = self.music_handler.get_lenght(song)
+        self.progress_slider.setRange(0, music_length)
 
     def update_progress(self) -> None:
         """Update the progress slider."""
         if not self.music_handler.is_playing():
-            self.progress_slider.setDisabled(True)
             return
+        # prevent triggering seek_audio while updating        
+        self.progress_slider.blockSignals(True)
+
         # Get current position of the audio file and update the slider
-        current_position = self.music_handler.get_current_pos() / 1000  # Convert to seconds
-        self.progress_slider.blockSignals(True)  # Prevent triggering seek_audio while updating
-        self.progress_slider.setValue(int(self.start_value + current_position))
+        current_position: float = self.music_handler.get_current_pos() / 1000  # Convert to seconds
+        self.progress_slider.setValue((self.start_value + current_position) - 2)
+        print((self.start_value + current_position) - 2)
+
+        # unblock triggering of seek_audio
         self.progress_slider.blockSignals(False)
 
     def seek_audio(self) -> None:
@@ -645,6 +647,7 @@ class Mp3Player(QMainWindow):
         # When the user clicks on the slider, move the audio to the selected position
         self.start_value: float = self.progress_slider.value()
         self.music_handler.change_music_pos(self.start_value)
+        self.update_progress()
 
     def closeEvent(self, event) -> None:
         if self.playlist_thread:
