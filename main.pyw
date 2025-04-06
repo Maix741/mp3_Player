@@ -1,4 +1,5 @@
-import sys, os, platform
+import platform
+import sys, os
 import locale
 
 from PySide6.QtWidgets import QApplication

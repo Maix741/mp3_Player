@@ -636,6 +636,7 @@ class Mp3Player(QMainWindow):
         """Update the progress slider."""
         if not self.music_handler.is_playing():
             return
+        self.progress_slider.setDisabled(False)
         # prevent triggering seek_audio while updating        
         self.progress_slider.blockSignals(True)
 
