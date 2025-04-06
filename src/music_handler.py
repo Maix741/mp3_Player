@@ -51,4 +51,4 @@ class MusicHandler:
 
     def terminate(self) -> None:
         self.stop_and_unload()
-        pygame.mixer.quit()
+        # pygame.mixer.quit()

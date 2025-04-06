@@ -547,6 +547,11 @@ class Mp3Player(QMainWindow):
         """Load an existing playlist."""
         playlist: list[str] = self.loader.get_playlist(name)
 
+        # stop currently playing music
+        if self.playlist_thread:
+            self.on_playlist_finished()
+        self.music_handler.stop_and_unload()
+
         self.playlist_list.clear()
         self.playlist_list.addItems([os.path.basename(file) for file in playlist]) # Display the Songnames in the playlist in the widget
         self.media_files = playlist
@@ -637,13 +642,14 @@ class Mp3Player(QMainWindow):
         # Get current position of the audio file and update the slider
         current_position: float = self.music_handler.get_current_pos() / 1000  # Convert to seconds
         self.progress_slider.setValue((self.start_value + current_position) - 2)
-        print((self.start_value + current_position) - 2)
 
         # unblock triggering of seek_audio
         self.progress_slider.blockSignals(False)
 
     def seek_audio(self) -> None:
         """set the audio to the selected position"""
+        if not self.music_handler.is_playing():
+            return
         # When the user clicks on the slider, move the audio to the selected position
         self.start_value: float = self.progress_slider.value()
         self.music_handler.change_music_pos(self.start_value)
