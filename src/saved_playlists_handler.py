@@ -44,7 +44,7 @@ class SavedPlaylistsHandler:
 
         return names
 
-    def load_playlists(self) -> dict[str, list[str]]: # FIXME: RAM intensive, bacause it loads every name and file_path
+    def load_playlists(self) -> dict[str, list[str]]: # unused
         """Load the saved Playlists.
 
         Returns:
@@ -58,7 +58,7 @@ class SavedPlaylistsHandler:
         playlists: dict[str, list[str]] = {}
 
         for file_path, name in zip(file_paths, names):
-            with gzip.open(file_path, "rt") as file:
+            with gzip.open(file_path, "rt", encoding="utf-8") as file:
                 playlists[os.path.splitext(name)[0]] = json.load(file)
 
         return playlists
