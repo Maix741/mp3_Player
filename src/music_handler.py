@@ -2,7 +2,7 @@ import pygame
 
 
 class MusicHandler:
-    def __init__(self):
+    def __init__(self) -> None:
         pygame.init()
 
     def change_music_pos(self, set_to) -> None:
