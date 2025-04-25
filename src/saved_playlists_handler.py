@@ -1,4 +1,5 @@
 import json
+import gzip
 import os
 
 
@@ -24,7 +25,7 @@ class SavedPlaylistsHandler:
         file_path: str = os.path.join(self.playlists_path, name)
         playlist: list[str] = []
 
-        with open(file_path, "r") as file:
+        with gzip.open(file_path, "rt", encoding="utf-8") as file:
             playlist = json.load(file)
 
 
@@ -43,7 +44,7 @@ class SavedPlaylistsHandler:
 
         return names
 
-    def load_playlists(self) -> dict[str, list[str]]: # RAM intensive, bacause it loads every name and file_path
+    def load_playlists(self) -> dict[str, list[str]]: # FIXME: RAM intensive, bacause it loads every name and file_path
         """Load the saved Playlists.
 
         Returns:
@@ -57,8 +58,8 @@ class SavedPlaylistsHandler:
         playlists: dict[str, list[str]] = {}
 
         for file_path, name in zip(file_paths, names):
-            with open(file_path, "r") as file:
-                playlists[name.split(".")[0]] = json.load(file)
+            with gzip.open(file_path, "rt") as file:
+                playlists[os.path.splitext(name)[0]] = json.load(file)
 
         return playlists
 
@@ -73,8 +74,8 @@ class SavedPlaylistsHandler:
             os.makedirs(self.playlists_path)
 
         file_path = os.path.join(self.playlists_path, f"{playlist_name}.json")
-        with open(file_path, "w") as file:
-            json.dump(playlist, file)  # Save the playlist in JSON format
+        with gzip.open(file_path, "wt", encoding="utf-8") as file:
+            json.dump(playlist, file)  # Save the playlist in JSON format with compression
 
     def remove_from_playlist(self, playlist_name: str, song_path: str) -> None:
         """Remove a song from a Playlist.
@@ -83,7 +84,7 @@ class SavedPlaylistsHandler:
             playlist_name (str): The name of the Playlist.
             song_path (str): The path of the song to remove.
         """
-        playlist: list[str] = self.load_playlists().get(playlist_name, [])
+        playlist: list[str] = self.get_playlist(playlist_name + ".json")
         if not playlist: return
 
         playlist.remove(song_path)
@@ -96,10 +97,10 @@ class SavedPlaylistsHandler:
             playlist_name (str): The name of the Playlist.
             song_path (str): The path of the song to add.
         """
-        if not playlist_name in self.load_playlists().keys():
+        if not playlist_name + ".json" in self.load_names():
             self.save_playlist(playlist_name, [song_path])
             return
-        playlist = self.load_playlists().get(playlist_name, [])
+        playlist: list[str] = self.get_playlist(playlist_name + ".json")
         playlist.append(song_path)
         self.save_playlist(playlist_name, playlist)
 
@@ -109,7 +110,7 @@ class SavedPlaylistsHandler:
         Args:
             playlist_name (str): The name of the Playlist.
         """
-        if not playlist_name in self.load_playlists().keys():
+        if not playlist_name + ".json" in self.load_names():
             return
         os.remove(os.path.join(self.playlists_path, f"{playlist_name}.json"))
 
