@@ -1,5 +1,7 @@
+from pathlib import Path
 import json
 import gzip
+import sys
 import os
 
 
@@ -7,10 +9,18 @@ class SavedPlaylistsHandler:
     """Class to handle the saved Playlists."""
     def __init__(self) -> None:
         """Initialize the saved Playlists handler."""
-        self.playlists_path: str = str(os.path.join(os.getenv("LOCALAPPDATA"),
-                                                "Mp3_Player",
-                                                "Playlists"
-                                                ))
+        if os.getenv("LOCALAPPDATA"):
+            self.playlists_path: str = os.path.join(os.getenv("LOCALAPPDATA"),
+                                                    "Mp3_Player",
+                                                    "Playlists"
+                                                    )
+        else:
+            current_dir: str = os.path.dirname(sys.argv[0])
+            if current_dir.endswith(("src", "bin")): current_dir = Path(current_dir).parent
+            self.playlists_path: str = os.path.join(current_dir,
+                                                    "Mp3_Player",
+                                                    "Playlists"
+                                                    )
 
         self.playlist_tester: PlaylistTester = PlaylistTester()
 
