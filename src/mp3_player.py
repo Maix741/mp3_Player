@@ -574,6 +574,7 @@ class Mp3Player(QMainWindow):
         self.reload_dock_widget()
 
     def fill_playlist_widget(self, files_to_fill: list[str], clear: bool = False) -> None:
+        """Fill the playlist widget with the provided files."""
         if clear:
             self.clear_playlist()
 
