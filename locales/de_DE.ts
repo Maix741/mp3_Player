@@ -4,98 +4,98 @@
 <context>
     <name>Mp3Player</name>
     <message>
-        <location filename="../src/mp3_player.py" line="52"/>
+        <location filename="../src/mp3_player.py" line="53"/>
         <source>MP3 Player</source>
         <translation>Mp3 Player</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="118"/>
+        <location filename="../src/mp3_player.py" line="121"/>
         <source>Song: {self.current_music}</source>
         <translation>Lied: {self.current_music}</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="197"/>
+        <location filename="../src/mp3_player.py" line="202"/>
         <source>Volume</source>
         <translation>Lautstärke</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="209"/>
+        <location filename="../src/mp3_player.py" line="214"/>
         <source>Controls</source>
         <translation>Steuerung</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="225"/>
-        <location filename="../src/mp3_player.py" line="328"/>
-        <location filename="../src/mp3_player.py" line="449"/>
-        <location filename="../src/mp3_player.py" line="461"/>
-        <location filename="../src/mp3_player.py" line="527"/>
+        <location filename="../src/mp3_player.py" line="230"/>
+        <location filename="../src/mp3_player.py" line="333"/>
+        <location filename="../src/mp3_player.py" line="459"/>
+        <location filename="../src/mp3_player.py" line="470"/>
+        <location filename="../src/mp3_player.py" line="531"/>
         <source>Play</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="229"/>
-        <location filename="../src/mp3_player.py" line="448"/>
+        <location filename="../src/mp3_player.py" line="234"/>
+        <location filename="../src/mp3_player.py" line="458"/>
         <source>Play Playlist</source>
         <translation>Play playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="234"/>
+        <location filename="../src/mp3_player.py" line="239"/>
         <source>Stop</source>
         <translation>Lied Stoppen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="239"/>
-        <location filename="../src/mp3_player.py" line="499"/>
+        <location filename="../src/mp3_player.py" line="244"/>
+        <location filename="../src/mp3_player.py" line="505"/>
         <source>Loop</source>
         <translation>Wiederholen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="244"/>
+        <location filename="../src/mp3_player.py" line="249"/>
         <source>Save Playlist</source>
         <translation>Playlist speichern</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="249"/>
+        <location filename="../src/mp3_player.py" line="254"/>
         <source>Add from Folder</source>
         <translation>Neu aus Ordner</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="286"/>
+        <location filename="../src/mp3_player.py" line="291"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="329"/>
+        <location filename="../src/mp3_player.py" line="334"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="330"/>
+        <location filename="../src/mp3_player.py" line="335"/>
         <source>Add to playlist</source>
         <translation>Zur Playlist hinzufügen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="359"/>
+        <location filename="../src/mp3_player.py" line="364"/>
         <source>File</source>
         <translation>Datei</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="363"/>
+        <location filename="../src/mp3_player.py" line="368"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="367"/>
+        <location filename="../src/mp3_player.py" line="372"/>
         <source>Exit</source>
         <translation>Beenden</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="371"/>
+        <location filename="../src/mp3_player.py" line="376"/>
         <source>Clear</source>
         <translation>Playlist leeren</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="376"/>
+        <location filename="../src/mp3_player.py" line="381"/>
         <source>Preferences</source>
         <translation>Einstellungen</translation>
     </message>
@@ -104,66 +104,66 @@
         <translation type="vanished">Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="380"/>
+        <location filename="../src/mp3_player.py" line="385"/>
         <source>Settings</source>
         <translation>Einstellungen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="403"/>
-        <location filename="../src/mp3_player.py" line="414"/>
+        <location filename="../src/mp3_player.py" line="410"/>
+        <location filename="../src/mp3_player.py" line="421"/>
         <source>Stop Playlist</source>
         <translation>Playlist stoppen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="415"/>
-        <location filename="../src/mp3_player.py" line="470"/>
-        <location filename="../src/mp3_player.py" line="615"/>
+        <location filename="../src/mp3_player.py" line="422"/>
+        <location filename="../src/mp3_player.py" line="477"/>
+        <location filename="../src/mp3_player.py" line="627"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="436"/>
+        <location filename="../src/mp3_player.py" line="443"/>
         <source>None</source>
         <translation>n/a</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="442"/>
+        <location filename="../src/mp3_player.py" line="450"/>
         <source>Song: {display_name}</source>
         <translation>Lied: {display_name}</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="507"/>
+        <location filename="../src/mp3_player.py" line="512"/>
         <source>Unloop</source>
         <translation>Wiederholen beenden</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="536"/>
+        <location filename="../src/mp3_player.py" line="540"/>
         <source>Choose Playlist</source>
         <translation>Playlist auswählen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="562"/>
+        <location filename="../src/mp3_player.py" line="565"/>
         <source>Enter Name</source>
         <translation>Namen eingeben</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="562"/>
-        <location filename="../src/mp3_player.py" line="576"/>
+        <location filename="../src/mp3_player.py" line="565"/>
+        <location filename="../src/mp3_player.py" line="579"/>
         <source>Please enter the name of the Playlist:</source>
         <translation>Bitte geben sie den Namen der Playlist ein:</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="576"/>
+        <location filename="../src/mp3_player.py" line="579"/>
         <source>Enter Playlist Name</source>
         <translation>Playlist Namen eingeben</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="587"/>
+        <location filename="../src/mp3_player.py" line="600"/>
         <source>Select MP3 Files</source>
         <translation>Audio Dateien auswählen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="590"/>
+        <location filename="../src/mp3_player.py" line="603"/>
         <source>audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)</source>
         <translation>Audio (*.mp3 *.wav *.ogg *.flac);;Alle Dateien (*)</translation>
     </message>

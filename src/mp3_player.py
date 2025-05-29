@@ -394,6 +394,10 @@ class Mp3Player(QMainWindow):
         self.playlist_list.clear()  # Clear the playlist display
         self.media_files.clear()  # Clear the playlist
 
+        # stop currently playing music (in playlist)
+        if self.playlist_thread:
+            self.on_playlist_finished()
+
         self.current_index = 0
         self.current_music = None
         self.update_current_song()
@@ -442,6 +446,7 @@ class Mp3Player(QMainWindow):
         if len(display_name) > max_length:
             display_name = display_name[:max_length] + "..."
 
+        display_name = os.path.splitext(display_name)[0]
         self.current_song.setText(self.tr(f"Song: {display_name}"))
 
     def on_playlist_finished(self) -> None:
@@ -541,20 +546,14 @@ class Mp3Player(QMainWindow):
             self.clear_playlist()
         self.media_files.extend(files) # Add the selected songs to the playlist
 
-        self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
+        self.fill_playlist_widget(files)
 
     def load_playlist(self, name: str) -> None:
         """Load an existing playlist."""
         playlist: list[str] = self.loader.get_playlist(name)
 
-        # stop currently playing music
-        if self.playlist_thread:
-            self.on_playlist_finished()
-        self.music_handler.stop_and_unload()
-
-        self.playlist_list.clear()
-        self.playlist_list.addItems([os.path.basename(file) for file in playlist]) # Display the Songnames in the playlist in the widget
         self.media_files = playlist
+        self.fill_playlist_widget(self.media_files, True)
 
     def load_existing_playlists(self) -> None:
         """Load the existing playlists."""
@@ -584,6 +583,16 @@ class Mp3Player(QMainWindow):
         self.load_existing_playlists()
         self.reload_dock_widget()
 
+    def fill_playlist_widget(self, files_to_fill: list[str], clear: bool = False) -> None:
+        if clear:
+            self.clear_playlist()
+
+        files_to_fill = [
+            os.path.splitext(os.path.basename(file))[0]
+            for file in files_to_fill
+        ]
+        self.playlist_list.addItems(files_to_fill) # Display the Songnames in the playlist in the widget
+
     def load_single_files(self, clear: bool = False) -> None:
         """Load single audio files."""
         # Open file dialog to select MP3 files
@@ -599,8 +608,7 @@ class Mp3Player(QMainWindow):
             self.clear_playlist()
 
         self.media_files.extend(files) # Add the selected songs to the playlist
-
-        self.playlist_list.addItems([os.path.basename(file) for file in files]) # Display the Songnames in the playlist
+        self.fill_playlist_widget(files)
  
     def play_selected(self) -> None:
         """Play the selected item in the playlist."""
