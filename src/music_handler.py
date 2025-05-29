@@ -35,14 +35,14 @@ class MusicHandler:
     def unpause(self) -> None:
         pygame.mixer.music.unpause()
 
-    def unloop(self) -> None:
+    def unloop(self) -> bool:
         if pygame.mixer.music.get_endevent() == pygame.constants.USEREVENT:
             pygame.mixer.music.set_endevent()
             return True
 
         return False
 
-    def loop(self) -> None:
+    def loop(self) -> bool:
         if pygame.mixer.music.get_endevent() != pygame.constants.USEREVENT:
             pygame.mixer.music.set_endevent(pygame.constants.USEREVENT)
             return True
