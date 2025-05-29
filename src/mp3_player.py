@@ -11,21 +11,12 @@ from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
 from PySide6.QtCore import Qt, QTimer
 from functools import partial
 
-if __name__ == "__main__":
-    from playlist_thread import PlaylistThread
-    from saved_playlists_handler import SavedPlaylistsHandler
-    from translation_handler import TranslationHandler
-    from settings_handler import SettingsHandler
-    from music_handler import MusicHandler
-    from settings_gui import SettingsGUI
-
-else:
-    from .playlist_thread import PlaylistThread
-    from .saved_playlists_handler import SavedPlaylistsHandler
-    from .translation_handler import TranslationHandler
-    from .settings_handler import SettingsHandler
-    from .music_handler import MusicHandler
-    from .settings_gui import SettingsGUI
+from .playlist_thread import PlaylistThread
+from .saved_playlists_handler import SavedPlaylistsHandler
+from .translation_handler import TranslationHandler
+from .settings_handler import SettingsHandler
+from .music_handler import MusicHandler
+from .settings_gui import SettingsGUI
 
 
 class Mp3Player(QMainWindow):
@@ -672,13 +663,3 @@ class Mp3Player(QMainWindow):
         self.timer.stop()
         self.music_handler.terminate()
         event.accept()
-
-
-if __name__ == "__main__":
-    import sys
-    from PySide6.QtWidgets import QApplication
-
-    app: QApplication = QApplication(sys.argv)
-    player: Mp3Player = Mp3Player(os.path.join(os.environ["USERPROFILE"], "Music"))
-    player.show()
-    sys.exit(app.exec())
