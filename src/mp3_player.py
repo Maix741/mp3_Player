@@ -6,9 +6,8 @@ from PySide6.QtWidgets import (
     QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, 
     QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout,
 )
-from PySide6.QtCore import QTranslator, QCoreApplication
+from PySide6.QtCore import Qt, QTimer, QTranslator, QCoreApplication
 from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
-from PySide6.QtCore import Qt, QTimer
 from functools import partial
 
 from .playlist_thread import PlaylistThread
