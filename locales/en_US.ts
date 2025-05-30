@@ -4,98 +4,98 @@
 <context>
     <name>Mp3Player</name>
     <message>
-        <location filename="../src/mp3_player.py" line="53"/>
+        <location filename="../src/mp3_player.py" line="43"/>
         <source>MP3 Player</source>
         <translation>Mp3 Player</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="121"/>
+        <location filename="../src/mp3_player.py" line="111"/>
         <source>Song: {self.current_music}</source>
         <translation>Song: {self.current_music}</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="202"/>
+        <location filename="../src/mp3_player.py" line="192"/>
         <source>Volume</source>
         <translation>Volume</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="214"/>
+        <location filename="../src/mp3_player.py" line="204"/>
         <source>Controls</source>
         <translation>Controls</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="230"/>
-        <location filename="../src/mp3_player.py" line="333"/>
-        <location filename="../src/mp3_player.py" line="459"/>
-        <location filename="../src/mp3_player.py" line="470"/>
-        <location filename="../src/mp3_player.py" line="531"/>
+        <location filename="../src/mp3_player.py" line="220"/>
+        <location filename="../src/mp3_player.py" line="323"/>
+        <location filename="../src/mp3_player.py" line="449"/>
+        <location filename="../src/mp3_player.py" line="460"/>
+        <location filename="../src/mp3_player.py" line="521"/>
         <source>Play</source>
         <translation>Play</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="234"/>
-        <location filename="../src/mp3_player.py" line="458"/>
+        <location filename="../src/mp3_player.py" line="224"/>
+        <location filename="../src/mp3_player.py" line="448"/>
         <source>Play Playlist</source>
         <translation>Play playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="239"/>
+        <location filename="../src/mp3_player.py" line="229"/>
         <source>Stop</source>
         <translation>Stop song</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="244"/>
-        <location filename="../src/mp3_player.py" line="505"/>
+        <location filename="../src/mp3_player.py" line="234"/>
+        <location filename="../src/mp3_player.py" line="495"/>
         <source>Loop</source>
         <translation>Loop</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="249"/>
+        <location filename="../src/mp3_player.py" line="239"/>
         <source>Save Playlist</source>
         <translation>Save playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="254"/>
+        <location filename="../src/mp3_player.py" line="244"/>
         <source>Add from Folder</source>
         <translation>Add from folder</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="291"/>
+        <location filename="../src/mp3_player.py" line="281"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="334"/>
+        <location filename="../src/mp3_player.py" line="324"/>
         <source>Remove</source>
         <translation>Remove</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="335"/>
+        <location filename="../src/mp3_player.py" line="325"/>
         <source>Add to playlist</source>
         <translation>Add to playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="364"/>
+        <location filename="../src/mp3_player.py" line="354"/>
         <source>File</source>
         <translation>File</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="368"/>
+        <location filename="../src/mp3_player.py" line="358"/>
         <source>Open</source>
         <translation>Open</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="372"/>
+        <location filename="../src/mp3_player.py" line="362"/>
         <source>Exit</source>
         <translation>Exit</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="376"/>
+        <location filename="../src/mp3_player.py" line="366"/>
         <source>Clear</source>
         <translation>Clear playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="381"/>
+        <location filename="../src/mp3_player.py" line="371"/>
         <source>Preferences</source>
         <translation>Settings</translation>
     </message>
@@ -104,66 +104,66 @@
         <translation type="vanished">Edit</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="385"/>
+        <location filename="../src/mp3_player.py" line="375"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="410"/>
-        <location filename="../src/mp3_player.py" line="421"/>
+        <location filename="../src/mp3_player.py" line="400"/>
+        <location filename="../src/mp3_player.py" line="411"/>
         <source>Stop Playlist</source>
         <translation>Stop playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="422"/>
-        <location filename="../src/mp3_player.py" line="477"/>
-        <location filename="../src/mp3_player.py" line="627"/>
+        <location filename="../src/mp3_player.py" line="412"/>
+        <location filename="../src/mp3_player.py" line="467"/>
+        <location filename="../src/mp3_player.py" line="618"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="443"/>
+        <location filename="../src/mp3_player.py" line="433"/>
         <source>None</source>
         <translation>None</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="450"/>
+        <location filename="../src/mp3_player.py" line="440"/>
         <source>Song: {display_name}</source>
         <translation>Song: {display_name}</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="512"/>
+        <location filename="../src/mp3_player.py" line="502"/>
         <source>Unloop</source>
         <translation>Unloop</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="540"/>
+        <location filename="../src/mp3_player.py" line="530"/>
         <source>Choose Playlist</source>
         <translation>Choose Playlist</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="565"/>
+        <location filename="../src/mp3_player.py" line="555"/>
         <source>Enter Name</source>
         <translation>Enter name</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="565"/>
-        <location filename="../src/mp3_player.py" line="579"/>
+        <location filename="../src/mp3_player.py" line="555"/>
+        <location filename="../src/mp3_player.py" line="569"/>
         <source>Please enter the name of the Playlist:</source>
         <translation>Please enter the name of the playlist:</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="579"/>
+        <location filename="../src/mp3_player.py" line="569"/>
         <source>Enter Playlist Name</source>
         <translation>Enter playlist name</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="600"/>
+        <location filename="../src/mp3_player.py" line="591"/>
         <source>Select MP3 Files</source>
         <translation>Select audio files</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="603"/>
+        <location filename="../src/mp3_player.py" line="594"/>
         <source>audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)</source>
         <translation>audio (*.mp3 *.wav *.ogg *.flac);;All files (*)</translation>
     </message>
@@ -171,57 +171,57 @@
 <context>
     <name>SettingsGUI</name>
     <message>
-        <location filename="../src/settings_gui.py" line="20"/>
+        <location filename="../src/settings_gui.py" line="31"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="40"/>
+        <location filename="../src/settings_gui.py" line="38"/>
         <source>Initial Directory:</source>
         <translation>Default directory:</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="46"/>
-        <location filename="../src/settings_gui.py" line="150"/>
+        <location filename="../src/settings_gui.py" line="41"/>
+        <location filename="../src/settings_gui.py" line="259"/>
         <source>Select Initial Directory</source>
         <translation>Select default directory</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="51"/>
+        <location filename="../src/settings_gui.py" line="50"/>
         <source>Language:</source>
         <translation>Language:</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="62"/>
+        <location filename="../src/settings_gui.py" line="61"/>
         <source>Default volume:</source>
         <translation>Default volume:</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="81"/>
+        <location filename="../src/settings_gui.py" line="79"/>
         <source>Shuffle:</source>
         <translation>Shuffle:</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="85"/>
-        <location filename="../src/settings_gui.py" line="86"/>
-        <location filename="../src/settings_gui.py" line="95"/>
-        <location filename="../src/settings_gui.py" line="96"/>
-        <location filename="../src/settings_gui.py" line="169"/>
-        <location filename="../src/settings_gui.py" line="172"/>
-        <location filename="../src/settings_gui.py" line="175"/>
+        <location filename="../src/settings_gui.py" line="81"/>
+        <location filename="../src/settings_gui.py" line="82"/>
+        <location filename="../src/settings_gui.py" line="92"/>
+        <location filename="../src/settings_gui.py" line="93"/>
+        <location filename="../src/settings_gui.py" line="278"/>
+        <location filename="../src/settings_gui.py" line="281"/>
+        <location filename="../src/settings_gui.py" line="284"/>
         <source>True</source>
         <translation>True</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="85"/>
-        <location filename="../src/settings_gui.py" line="86"/>
-        <location filename="../src/settings_gui.py" line="95"/>
-        <location filename="../src/settings_gui.py" line="96"/>
+        <location filename="../src/settings_gui.py" line="81"/>
+        <location filename="../src/settings_gui.py" line="82"/>
+        <location filename="../src/settings_gui.py" line="92"/>
+        <location filename="../src/settings_gui.py" line="93"/>
         <source>False</source>
         <translation>False</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="91"/>
+        <location filename="../src/settings_gui.py" line="90"/>
         <source>Load Saved Playlist:</source>
         <translation>Load saved playlists:</translation>
     </message>
@@ -231,41 +231,42 @@
         <translation>Window design:</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="105"/>
-        <location filename="../src/settings_gui.py" line="106"/>
+        <location filename="../src/settings_gui.py" line="103"/>
+        <location filename="../src/settings_gui.py" line="104"/>
         <source>System design</source>
         <translation>System design</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="105"/>
+        <location filename="../src/settings_gui.py" line="103"/>
         <source>Dark</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="105"/>
+        <location filename="../src/settings_gui.py" line="103"/>
         <source>Light</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="123"/>
+        <location filename="../src/settings_gui.py" line="126"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="140"/>
+        <location filename="../src/settings_gui.py" line="249"/>
         <source>Restart required</source>
         <translation>Restart required</translation>
     </message>
     <message>
-        <location filename="../src/settings_gui.py" line="140"/>
+        <location filename="../src/settings_gui.py" line="249"/>
         <source>Restarting the app is required
  for all changes to take affect</source>
         <translation>Restarting the app is required
  for all changes to take affect</translation>
     </message>
     <message>
+        <location filename="../src/settings_gui.py" line="131"/>
         <source>Save and Restart</source>
-        <translation type="vanished">Save and restart</translation>
+        <translation>Save and restart</translation>
     </message>
 </context>
 </TS>

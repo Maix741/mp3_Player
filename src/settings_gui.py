@@ -4,30 +4,138 @@ import os, sys
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
     QPushButton, QSlider, QVBoxLayout, QFileDialog, QLabel, QWidget, QLineEdit,
-    QSpacerItem, QSizePolicy, QDockWidget, QHBoxLayout, QComboBox, QMessageBox
+    QSpacerItem, QSizePolicy, QMainWindow, QHBoxLayout, QComboBox, QMessageBox
 )
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtCore import Qt
 
 
-class SettingsGUI(QDockWidget):
+class SettingsGUI(QMainWindow):
     def __init__(self, settings_handler, translator, parent=None) -> None:
-        super().__init__(parent)
+        super(SettingsGUI, self).__init__(parent)
 
         self.settings_handler = settings_handler
         self.restart_required: bool = False
 
-        self.setWindowTitle(self.tr("Settings"))
-        self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
 
         self.translator = translator
         QCoreApplication.installTranslator(self.translator)
 
+        # Create a central widget and set it as the main window's central widget
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+
+        # Create a layout for the central widget
+        self.layout = QVBoxLayout(self.central_widget)
+
+        self.setWindowTitle(self.tr("Settings"))
+        self.setGeometry(100, 100, 400, 250)
+
         self.init_ui()
 
     def init_ui(self) -> None:
-        self.setGeometry(100, 100, 300, 300)
+        # Initial Directory Setting
+        initial_directory_label = QLabel(self.tr("Initial Directory:"))
+        self.initial_directory_display = QLineEdit(self.settings_handler.get("initial_directory"))
+        self.initial_directory_display.setReadOnly(True)
+        initial_directory_button = QPushButton(self.tr("Select Initial Directory"))
+        initial_directory_button.clicked.connect(self.select_initial_directory)
+
+        initial_directory_layout: QHBoxLayout = QHBoxLayout()
+        initial_directory_layout.addWidget(initial_directory_label)
+        initial_directory_layout.addWidget(self.initial_directory_display)
+        initial_directory_layout.addWidget(initial_directory_button)
+
+        # Language Selection
+        system_locale_label = QLabel(self.tr("Language:"))
+        self.system_locale_option = QComboBox()
+        self.system_locale_option.addItems(self.get_possible_locales())
+        self.system_locale_option.setCurrentText(self.settings_handler.get("system_locale"))
+        self.system_locale_option.currentTextChanged.connect(self.set_locale)
+
+        language_layout: QHBoxLayout = QHBoxLayout()
+        language_layout.addWidget(system_locale_label)
+        language_layout.addWidget(self.system_locale_option)
+
+        # Volume
+        volume_label = QLabel(self.tr("Default volume:"))
+
+        self.volume_slider = QSlider(Qt.Horizontal)
+        self.volume_slider.setRange(0, 100)
+        self.volume_slider.setValue(int(self.settings_handler.get("volume")))
+        self.volume_slider.valueChanged.connect(self.set_volume)
+
+        self.volume_input = QLineEdit()
+        self.volume_input.setFixedWidth(30)
+        self.volume_input.setText(str(self.settings_handler.get("volume")))
+        self.volume_input.textChanged.connect(self.set_volume)
+
+        volume_layout: QHBoxLayout = QHBoxLayout()
+        volume_layout.addWidget(volume_label)
+        volume_layout.addWidget(self.volume_slider)
+        volume_layout.addWidget(self.volume_input)
+
+        # Shuffle
+        shuffle_label = QLabel(self.tr("Shuffle:"))
+        self.shuffle_option = QComboBox()
+        self.shuffle_option.addItems([self.tr("True"), self.tr("False")])
+        self.shuffle_option.setCurrentText(self.tr("True") if self.settings_handler.get("shuffle") else self.tr("False"))
+        self.shuffle_option.currentTextChanged.connect(self.set_shuffle)
+
+        shuffle_layout: QHBoxLayout = QHBoxLayout()
+        shuffle_layout.addWidget(shuffle_label)
+        shuffle_layout.addWidget(self.shuffle_option)
+
+        # Load Saved Playlists
+        load_saved_playlist_label = QLabel(self.tr("Load Saved Playlist:"))
+        self.load_saved_playlist_option = QComboBox()
+        self.load_saved_playlist_option.addItems([self.tr("True"), self.tr("False")])
+        self.load_saved_playlist_option.setCurrentText(self.tr("True") if self.settings_handler.get("load_saved_playlist") else self.tr("False"))
+        self.load_saved_playlist_option.currentTextChanged.connect(self.set_load_saved_playlist)
+
+        load_saved_layout: QHBoxLayout = QHBoxLayout()
+        load_saved_layout.addWidget(load_saved_playlist_label)
+        load_saved_layout.addWidget(self.load_saved_playlist_option)
+
+        # design
+        design_label = QLabel(self.tr("Window Design:"))
+        self.design_option = QComboBox()
+        self.design_option.addItems([self.tr("System design"), self.tr("Dark"), self.tr("Light")])
+        self.design_option.setCurrentText(self.settings_handler.get("design") or self.tr("System design"))
+        self.design_option.currentTextChanged.connect(self.set_design)
+
+        design_layout: QHBoxLayout = QHBoxLayout()
+        design_layout.addWidget(design_label)
+        design_layout.addWidget(self.design_option)
+
+        # Add layouts to main layout
+        self.layout.addLayout(initial_directory_layout)
+        self.layout.addLayout(language_layout)
+        self.layout.addLayout(volume_layout)
+        self.layout.addLayout(shuffle_layout)
+        self.layout.addLayout(load_saved_layout)
+        self.layout.addLayout(design_layout)
+
+        # Spacer
+        self.layout.addItem(QSpacerItem(0, 20, QSizePolicy.Expanding, QSizePolicy.Expanding))
+
+        # Save and Save and Restart buttons layout
+        buttons_layout = QHBoxLayout()
+
+        # Save button
+        self.save_button = QPushButton(self.tr("Save"))
+        self.save_button.clicked.connect(self.save_settings_and_close)
+        buttons_layout.addWidget(self.save_button)
+
+        # Save and restart button
+        self.save_restart_button = QPushButton(self.tr("Save and Restart"))
+        self.save_restart_button.clicked.connect(self.save_settings_and_restart)
+        # self.buttons_layout.addWidget(self.save_restart_button)
+
+        self.layout.addLayout(buttons_layout)
+
+    """
+    def init_ui_old(self) -> None:
         self.main_widget = QWidget()
         self.main_layout = QVBoxLayout(self.main_widget)
 
@@ -132,6 +240,7 @@ class SettingsGUI(QDockWidget):
         self.main_layout.addLayout(self.buttons_layout)
 
         self.setWidget(self.main_widget)
+    """
 
     def save_settings_and_close(self) -> None:
         """Save the current settings and close the settings window.
