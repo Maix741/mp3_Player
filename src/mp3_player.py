@@ -385,7 +385,7 @@ class Mp3Player(QMainWindow):
         self.media_files.clear()  # Clear the playlist
 
         # stop currently playing music (in playlist)
-        if self.playlist_thread:
+        if hasattr(self, "playlist_thread") and self.playlist_thread:
             self.on_playlist_finished()
 
         self.current_index = 0
@@ -441,7 +441,8 @@ class Mp3Player(QMainWindow):
 
     def on_playlist_finished(self) -> None:
         """Stop the playlist and reset the buttons."""
-        self.playlist_thread.stop()
+        if hasattr(self, "playlist_thread") and self.playlist_thread:
+            self.playlist_thread.stop()
 
         self.progress_slider.setValue(0)
         self.progress_slider.setDisabled(True)
@@ -542,8 +543,7 @@ class Mp3Player(QMainWindow):
         """Load an existing playlist."""
         playlist: list[str] = self.loader.get_playlist(name)
 
-        self.media_files = playlist
-        self.fill_playlist_widget(self.media_files, True)
+        self.fill_playlist_widget(playlist, True)
 
     def load_existing_playlists(self) -> None:
         """Load the existing playlists."""
@@ -575,13 +575,14 @@ class Mp3Player(QMainWindow):
 
     def fill_playlist_widget(self, files_to_fill: list[str], clear: bool = False) -> None:
         """Fill the playlist widget with the provided files."""
+        if clear:
+            self.clear_playlist()
+
+        self.media_files.extend(files_to_fill)
         files_to_fill = [
             os.path.splitext(os.path.basename(file))[0]
             for file in files_to_fill
         ]
-
-        if clear:
-            self.clear_playlist()
 
         self.playlist_list.addItems(files_to_fill) # Display the Songnames in the playlist in the widget
 
