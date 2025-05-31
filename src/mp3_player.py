@@ -575,13 +575,14 @@ class Mp3Player(QMainWindow):
 
     def fill_playlist_widget(self, files_to_fill: list[str], clear: bool = False) -> None:
         """Fill the playlist widget with the provided files."""
-        if clear:
-            self.clear_playlist()
-
         files_to_fill = [
             os.path.splitext(os.path.basename(file))[0]
             for file in files_to_fill
         ]
+
+        if clear:
+            self.clear_playlist()
+
         self.playlist_list.addItems(files_to_fill) # Display the Songnames in the playlist in the widget
 
     def load_single_files(self, clear: bool = False) -> None:
