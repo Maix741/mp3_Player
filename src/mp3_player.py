@@ -533,11 +533,8 @@ class Mp3Player(QMainWindow):
         if not directory: return
 
         files: list[str] = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(self.audio_file_types)]
-        if clear:
-            self.clear_playlist()
-        self.media_files.extend(files) # Add the selected songs to the playlist
 
-        self.fill_playlist_widget(files)
+        self.fill_playlist_widget(files, clear=clear)
 
     def load_playlist(self, name: str) -> None:
         """Load an existing playlist."""
@@ -597,11 +594,7 @@ class Mp3Player(QMainWindow):
 
         if not files: return
 
-        if clear:
-            self.clear_playlist()
-
-        self.media_files.extend(files) # Add the selected songs to the playlist
-        self.fill_playlist_widget(files)
+        self.fill_playlist_widget(files, clear=clear)
  
     def play_selected(self) -> None:
         """Play the selected item in the playlist."""

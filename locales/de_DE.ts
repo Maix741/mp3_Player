@@ -117,7 +117,7 @@
     <message>
         <location filename="../src/mp3_player.py" line="412"/>
         <location filename="../src/mp3_player.py" line="468"/>
-        <location filename="../src/mp3_player.py" line="620"/>
+        <location filename="../src/mp3_player.py" line="613"/>
         <source>Pause</source>
         <translation>Pause</translation>
     </message>
@@ -142,28 +142,28 @@
         <translation>Playlist auswählen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="555"/>
+        <location filename="../src/mp3_player.py" line="552"/>
         <source>Enter Name</source>
         <translation>Namen eingeben</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="555"/>
-        <location filename="../src/mp3_player.py" line="569"/>
+        <location filename="../src/mp3_player.py" line="552"/>
+        <location filename="../src/mp3_player.py" line="566"/>
         <source>Please enter the name of the Playlist:</source>
         <translation>Bitte geben sie den Namen der Playlist ein:</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="569"/>
+        <location filename="../src/mp3_player.py" line="566"/>
         <source>Enter Playlist Name</source>
         <translation>Playlist Namen eingeben</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="593"/>
+        <location filename="../src/mp3_player.py" line="590"/>
         <source>Select MP3 Files</source>
         <translation>Audio Dateien auswählen</translation>
     </message>
     <message>
-        <location filename="../src/mp3_player.py" line="596"/>
+        <location filename="../src/mp3_player.py" line="593"/>
         <source>audio (*.mp3 *.wav *.ogg *.flac);;All Files (*)</source>
         <translation>Audio (*.mp3 *.wav *.ogg *.flac);;Alle Dateien (*)</translation>
     </message>
