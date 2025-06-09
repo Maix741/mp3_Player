@@ -28,5 +28,5 @@ An MP3 Player application built using Python and PySide6.
 
 Run the application:
     ```sh
-    python app.pyw
+    python main.pyw
     ```
