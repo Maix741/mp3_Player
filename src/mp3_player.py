@@ -3,8 +3,8 @@ import os, sys
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
-    QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QGridLayout,
-    QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout,
+    QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu,
+    QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog,QWidget, QGridLayout
 )
 from PySide6.QtCore import Qt, QTimer, QTranslator, QCoreApplication
 from PySide6.QtGui import QAction, QContextMenuEvent, QIcon
@@ -26,8 +26,10 @@ class Mp3Player(QMainWindow):
         """Initialize the MP3 Player.
 
         Args:
-            initial_directory (str, optional): The initial directory to load files from. Defaults to None.
+            initial_directory (str, optional): The initial directory to load files from. Defaults to "".
             load_saved (bool, optional): Whether to load saved playlists. Defaults to True.
+            shuffle (bool, optional): Whether to shuffle the playlist. Defaults to False.
+            locale (str, optional): The locale to use for translations. Defaults to "en_US".
             parent (QWidget | None, optional): The parent object. Defaults to None.
         """
         super().__init__(parent)
@@ -359,8 +361,8 @@ class Mp3Player(QMainWindow):
         file_menu.addAction(clear_action)
 
         # Create "Prefrences" menu
-        Preferences_menu = QMenu(self.tr("Preferences"), self)
-        menubar.addMenu(Preferences_menu)
+        preferences_menu = QMenu(self.tr("Preferences"), self)
+        menubar.addMenu(preferences_menu)
 
         # Add actions to the "Settings" menu
         settings_action = QAction(self.tr("Settings"), self)
@@ -368,7 +370,7 @@ class Mp3Player(QMainWindow):
         settings_action.triggered.connect(show_settings)
 
 
-        Preferences_menu.addAction(settings_action)
+        preferences_menu.addAction(settings_action)
  
     def clear_playlist(self) -> None:
         """Clear the playlist and stop the current audio."""
