@@ -58,6 +58,11 @@ class Mp3Player(QMainWindow):
         else:
             self.assets_path: str = os.path.join(current_path, "assets")
 
+        if self.light_mode:
+            self.assets_path: str = os.path.join(self.assets_path, "light")
+        else:
+            self.assets_path: str = os.path.join(self.assets_path, "dark")
+
         # reset pygame music start position
         self.start_value: float = 0.0
 
@@ -96,10 +101,7 @@ class Mp3Player(QMainWindow):
     def init_gui(self) -> None:
         """Initialize the GUI elements."""
         # Set the window icon based on the system's color scheme
-        if self.light_mode:
-            self.setWindowIcon(QIcon(os.path.join(self.assets_path, "dark", "icon.png")))
-        else:
-            self.setWindowIcon(QIcon(os.path.join(self.assets_path, "light", "icon.png")))
+        self.setWindowIcon(QIcon(os.path.join(self.assets_path, "icon.png")))
 
         # Create the central widget layout
         central_widget = QWidget(self)
@@ -147,10 +149,7 @@ class Mp3Player(QMainWindow):
         # Rewind button
         self.rewind_button = QPushButton(self)
         self.rewind_button.setFixedWidth(40)
-        if self.light_mode:
-            self.rewind_button.setIcon(QIcon(os.path.join(self.assets_path, "dark", "rewind.png")))
-        else:
-            self.rewind_button.setIcon(QIcon(os.path.join(self.assets_path, "light", "rewind.png")))
+        self.rewind_button.setIcon(QIcon(os.path.join(self.assets_path, "rewind.png")))
         self.rewind_button.clicked.connect(self.rewind_song)
         grid_layout.addWidget(self.rewind_button, 0, 0)
 
@@ -163,10 +162,7 @@ class Mp3Player(QMainWindow):
         # Skip button
         self.skip_button = QPushButton(self)
         self.skip_button.setFixedWidth(40)
-        if self.light_mode:
-            self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "dark", "skip.png")))
-        else:
-            self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "light", "skip.png")))
+        self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "skip.png")))
         self.skip_button.clicked.connect(self.skip_song)
         grid_layout.addWidget(self.skip_button, 0, 2)
 
