@@ -3,7 +3,7 @@ import os, sys
 
 # Import GUI elements from PySide6
 from PySide6.QtWidgets import (
-    QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, 
+    QMainWindow, QPushButton, QSlider, QVBoxLayout, QListWidget, QFileDialog, QLabel, QMenu, QWidget, QGridLayout,
     QSpacerItem, QSizePolicy, QDockWidget, QScrollArea, QInputDialog, QHBoxLayout,
 )
 from PySide6.QtCore import Qt, QTimer, QTranslator, QCoreApplication
@@ -141,47 +141,40 @@ class Mp3Player(QMainWindow):
 
     def create_sliders(self, central_layout: QVBoxLayout) -> None:
         """Create the progress and volume sliders."""
-        # Create a layout for the progress slider and buttons
-        progress_layout = QVBoxLayout()
-
-        # Create a horizontal layout for the progress slider and buttons
-        slider_layout = QHBoxLayout()
+        # Create a grid layout for the progress slider and buttons
+        grid_layout = QGridLayout()
 
         # Rewind button
         self.rewind_button = QPushButton(self)
-        self.rewind_button.setFixedWidth(40)  # Set a smaller width for the button
+        self.rewind_button.setFixedWidth(40)
         if self.light_mode:
             self.rewind_button.setIcon(QIcon(os.path.join(self.assets_path, "dark", "rewind.png")))
         else:
             self.rewind_button.setIcon(QIcon(os.path.join(self.assets_path, "light", "rewind.png")))
         self.rewind_button.clicked.connect(self.rewind_song)
-        slider_layout.addWidget(self.rewind_button)
+        grid_layout.addWidget(self.rewind_button, 0, 0)
 
         # Progress slider (for tracking and seeking audio progress)
         self.progress_slider = QSlider(Qt.Horizontal, self)
         self.progress_slider.setRange(0, 100)
         self.progress_slider.sliderPressed.connect(self.seek_audio)
-        slider_layout.addWidget(self.progress_slider)
+        grid_layout.addWidget(self.progress_slider, 0, 1)
 
         # Skip button
         self.skip_button = QPushButton(self)
-        self.skip_button.setFixedWidth(40)  # Set a smaller width for the button
+        self.skip_button.setFixedWidth(40)
         if self.light_mode:
             self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "dark", "skip.png")))
         else:
             self.skip_button.setIcon(QIcon(os.path.join(self.assets_path, "light", "skip.png")))
         self.skip_button.clicked.connect(self.skip_song)
-        slider_layout.addWidget(self.skip_button)
+        grid_layout.addWidget(self.skip_button, 0, 2)
 
-        # Add the slider layout to the progress layout
-        progress_layout.addLayout(slider_layout)
-
-        progress_layout.addWidget(self.skip_button)
-
-        # Add the progress layout to the central layout
-        central_layout.addLayout(progress_layout)
 
         # Volume slider (bottom)
+        volume_label: QLabel = QLabel(self.tr("Volume"))
+        grid_layout.addWidget(volume_label, 1, 0, 1, 3)
+
         start_volume: int = int(self.settings_handler.get("volume")) or 50
         self.volume_slider = QSlider(Qt.Horizontal, self)
         self.volume_slider.setRange(0, 100)
@@ -189,8 +182,10 @@ class Mp3Player(QMainWindow):
         self.volume_slider.valueChanged.connect(self.set_volume)
         self.set_volume(start_volume)
 
-        central_layout.addWidget(QLabel(self.tr("Volume")))
-        central_layout.addWidget(self.volume_slider)
+        grid_layout.addWidget(self.volume_slider, 2, 0, 1, 3)
+
+        # Add the grid layout to the central layout
+        central_layout.addLayout(grid_layout)
 
     def create_controls_dock(self) -> None:
         """Create the dock widget with control buttons."""
